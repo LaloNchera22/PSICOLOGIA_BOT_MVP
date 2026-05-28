@@ -4,6 +4,42 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+const PLACEHOLDERS = [
+  "¿qué te trae por aquí hoy?",
+  "cuéntame, ¿cómo te sientes?",
+  "¿hay algo que te pesa últimamente?",
+  "¿qué tienes en mente?",
+  "¿en qué puedo acompañarte hoy?",
+];
+
+function useTypewriter(phrases: string[]) {
+  const [displayed, setDisplayed] = useState("");
+  const [phraseIdx, setPhraseIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const phrase = phrases[phraseIdx];
+    let timeout: ReturnType<typeof setTimeout>;
+
+    if (!deleting && charIdx < phrase.length) {
+      timeout = setTimeout(() => setCharIdx((i) => i + 1), 55);
+    } else if (!deleting && charIdx === phrase.length) {
+      timeout = setTimeout(() => setDeleting(true), 2200);
+    } else if (deleting && charIdx > 0) {
+      timeout = setTimeout(() => setCharIdx((i) => i - 1), 28);
+    } else {
+      setDeleting(false);
+      setPhraseIdx((i) => (i + 1) % phrases.length);
+    }
+
+    setDisplayed(phrase.slice(0, charIdx));
+    return () => clearTimeout(timeout);
+  }, [charIdx, deleting, phraseIdx, phrases]);
+
+  return displayed;
+}
+
 export default function LandingPage() {
   const router = useRouter();
   const [input, setInput] = useState("");
@@ -15,7 +51,10 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const animatedPlaceholder = useTypewriter(PLACEHOLDERS);
 
   useEffect(() => {
     const supabase = createClient();
@@ -85,7 +124,7 @@ export default function LandingPage() {
       {/* Top navigation */}
       <nav className="app-nav animate-fade-up">
         <span className="nav-brand">espacio</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button className="nav-link-btn" onClick={() => openModal("signin")}>
             iniciar sesión
           </button>
@@ -99,26 +138,41 @@ export default function LandingPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-16">
         {/* Hero text */}
         <div className="relative z-10 text-center mb-10 animate-fade-up">
-          <p className="text-xs text-[#6b9f9a] mb-5 tracking-[0.3em] uppercase">
+          <p className="text-xs text-[#3d8c87] mb-5 tracking-[0.3em] uppercase font-semibold">
             tu espacio
           </p>
-          <h1 className="font-display text-6xl md:text-7xl text-[#2d3142] leading-tight mb-6 italic font-normal">
+          <h1 className="font-display text-6xl md:text-7xl text-[#1a1f33] leading-tight mb-6 italic font-normal">
             un lugar para<br />conversar
           </h1>
-          <p className="text-base text-[#6b7f7c] max-w-xs mx-auto leading-relaxed font-light">
+          <p className="text-base text-[#3d4a58] max-w-xs mx-auto leading-relaxed font-light">
             aquí puedes hablar libremente —<br />escucho sin juzgar, sin prisa
           </p>
         </div>
 
-        {/* Input card */}
-        <div className="relative z-10 glass-card w-full max-w-xl p-5 animate-fade-up-delay">
+        {/* Input card — wider */}
+        <div className="relative z-10 glass-card w-full max-w-2xl p-6 animate-fade-up-delay">
+          {/* Animated placeholder when empty & unfocused */}
+          {!input && !focused && (
+            <div
+              className="absolute pointer-events-none select-none"
+              style={{ top: "1.55rem", left: "1.5rem", right: "4rem" }}
+            >
+              <span className="text-lg text-[#a8b8b6] leading-relaxed">
+                {animatedPlaceholder}
+              </span>
+              <span className="typewriter-cursor" />
+            </div>
+          )}
+
           <textarea
             ref={textareaRef}
-            className="w-full bg-transparent outline-none resize-none text-[#2d3142] text-lg placeholder-[#b0bab8] leading-relaxed"
-            rows={3}
-            placeholder="¿qué te trae por aquí hoy?"
+            className="w-full bg-transparent outline-none resize-none text-[#1a1f33] text-lg leading-relaxed"
+            rows={4}
+            placeholder={focused && !input ? "¿qué te trae por aquí hoy?" : ""}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -126,7 +180,7 @@ export default function LandingPage() {
               }
             }}
           />
-          <div className="flex items-center justify-end mt-2 pt-2 border-t border-white/40">
+          <div className="flex items-center justify-end mt-3 pt-3 border-t border-white/40">
             <button
               onClick={handleSend}
               disabled={!input.trim()}
@@ -158,20 +212,20 @@ export default function LandingPage() {
             {/* Tabs */}
             <div className="flex gap-6 mb-7 border-b border-[#c8deda]">
               <button
-                className={`pb-3 text-base font-medium transition-colors ${mode === "signup" ? "text-[#2d3142] border-b-2 border-[#6b9f9a]" : "text-[#a0aaa8]"}`}
+                className={`pb-3 text-base font-semibold transition-colors ${mode === "signup" ? "text-[#1a1f33] border-b-2 border-[#3d8c87]" : "text-[#8a9a9a]"}`}
                 onClick={() => { setMode("signup"); setError(null); setInfo(null); }}
               >
                 crear cuenta
               </button>
               <button
-                className={`pb-3 text-base font-medium transition-colors ${mode === "signin" ? "text-[#2d3142] border-b-2 border-[#6b9f9a]" : "text-[#a0aaa8]"}`}
+                className={`pb-3 text-base font-semibold transition-colors ${mode === "signin" ? "text-[#1a1f33] border-b-2 border-[#3d8c87]" : "text-[#8a9a9a]"}`}
                 onClick={() => { setMode("signin"); setError(null); setInfo(null); }}
               >
                 iniciar sesión
               </button>
             </div>
 
-            <p className="text-[#6b7f7c] text-sm mb-5 font-light">
+            <p className="text-[#3d4a58] text-sm mb-5 font-light">
               {mode === "signup"
                 ? "crea tu espacio — es gratis y confidencial"
                 : "continúa desde donde lo dejaste"}
@@ -206,10 +260,10 @@ export default function LandingPage() {
               />
 
               {error && (
-                <p className="text-xs text-rose-500 text-center pt-1">{error}</p>
+                <p className="text-xs text-rose-600 text-center pt-1">{error}</p>
               )}
               {info && (
-                <p className="text-xs text-[#6b9f9a] text-center pt-1">{info}</p>
+                <p className="text-xs text-[#3d8c87] text-center pt-1">{info}</p>
               )}
 
               <button type="submit" disabled={loading} className="primary-btn mt-3">
@@ -221,7 +275,7 @@ export default function LandingPage() {
               </button>
             </form>
 
-            <p className="text-xs text-[#b0bab8] text-center mt-5">
+            <p className="text-xs text-[#8a9a9a] text-center mt-5">
               tus conversaciones son privadas y confidenciales
             </p>
           </div>
