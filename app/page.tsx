@@ -17,7 +17,6 @@ export default function LandingPage() {
   const [info, setInfo] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Redirect if already logged in (middleware also handles this)
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getSession().then(({ data }) => {
@@ -25,10 +24,17 @@ export default function LandingPage() {
     });
   }, [router]);
 
+  function openModal(m: "signin" | "signup") {
+    setMode(m);
+    setError(null);
+    setInfo(null);
+    setShowModal(true);
+  }
+
   function handleSend() {
     const text = input.trim();
     if (!text) return;
-    setShowModal(true);
+    openModal("signup");
   }
 
   async function handleAuth(e: React.FormEvent) {
@@ -70,62 +76,71 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="gradient-bg min-h-screen flex flex-col items-center justify-center px-6 py-12">
+    <div className="gradient-bg min-h-screen flex flex-col">
       {/* Background blobs */}
       <div className="blob blob-1" />
       <div className="blob blob-2" />
       <div className="blob blob-3" />
 
-      {/* Hero text */}
-      <div className="relative z-10 text-center mb-10 animate-fade-up">
-        <p className="text-lg text-[#6b9f9a] mb-3 tracking-widest uppercase">
-          tu espacio
-        </p>
-        <h1 className="text-6xl md:text-7xl text-[#2d3142] leading-tight mb-5">
-          un lugar para<br />conversar
-        </h1>
-        <p className="text-xl text-[#6b7f7c] max-w-sm mx-auto leading-relaxed">
-          aquí puedes hablar libremente — escucho sin juzgar, sin prisa
-        </p>
-      </div>
-
-      {/* Input card */}
-      <div className="relative z-10 glass-card w-full max-w-2xl p-5 animate-fade-up-delay">
-        <textarea
-          ref={textareaRef}
-          className="w-full bg-transparent outline-none resize-none text-[#2d3142] text-xl placeholder-[#a0aaa8] leading-relaxed"
-          rows={3}
-          placeholder="¿qué te trae por aquí hoy?"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-        />
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/40">
-          <span className="text-sm text-[#a0aaa8]">
-            enter para continuar · shift+enter nueva línea
-          </span>
-          <button
-            onClick={handleSend}
-            disabled={!input.trim()}
-            className="send-btn"
-            aria-label="Enviar"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" />
-            </svg>
+      {/* Top navigation */}
+      <nav className="app-nav animate-fade-up">
+        <span className="nav-brand">espacio</span>
+        <div className="flex items-center gap-2">
+          <button className="nav-link-btn" onClick={() => openModal("signin")}>
+            iniciar sesión
+          </button>
+          <button className="nav-cta-btn" onClick={() => openModal("signup")}>
+            crear cuenta
           </button>
         </div>
-      </div>
+      </nav>
 
-      <p className="relative z-10 text-sm text-[#a0aaa8] mt-6 animate-fade-up-delay2">
-        tus conversaciones son privadas y confidenciales
-      </p>
+      {/* Main content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-16">
+        {/* Hero text */}
+        <div className="relative z-10 text-center mb-10 animate-fade-up">
+          <p className="text-xs text-[#6b9f9a] mb-5 tracking-[0.3em] uppercase">
+            tu espacio
+          </p>
+          <h1 className="font-display text-6xl md:text-7xl text-[#2d3142] leading-tight mb-6 italic font-normal">
+            un lugar para<br />conversar
+          </h1>
+          <p className="text-base text-[#6b7f7c] max-w-xs mx-auto leading-relaxed font-light">
+            aquí puedes hablar libremente —<br />escucho sin juzgar, sin prisa
+          </p>
+        </div>
+
+        {/* Input card */}
+        <div className="relative z-10 glass-card w-full max-w-xl p-5 animate-fade-up-delay">
+          <textarea
+            ref={textareaRef}
+            className="w-full bg-transparent outline-none resize-none text-[#2d3142] text-lg placeholder-[#b0bab8] leading-relaxed"
+            rows={3}
+            placeholder="¿qué te trae por aquí hoy?"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+          />
+          <div className="flex items-center justify-end mt-2 pt-2 border-t border-white/40">
+            <button
+              onClick={handleSend}
+              disabled={!input.trim()}
+              className="send-btn"
+              aria-label="Enviar"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Auth modal */}
       {showModal && (
@@ -141,28 +156,28 @@ export default function LandingPage() {
         >
           <div className="glass-card modal-card">
             {/* Tabs */}
-            <div className="flex gap-6 mb-8 border-b border-[#c8deda]">
+            <div className="flex gap-6 mb-7 border-b border-[#c8deda]">
               <button
-                className={`pb-3 text-xl transition-colors ${mode === "signup" ? "text-[#2d3142] border-b-2 border-[#6b9f9a]" : "text-[#a0aaa8]"}`}
+                className={`pb-3 text-base font-medium transition-colors ${mode === "signup" ? "text-[#2d3142] border-b-2 border-[#6b9f9a]" : "text-[#a0aaa8]"}`}
                 onClick={() => { setMode("signup"); setError(null); setInfo(null); }}
               >
                 crear cuenta
               </button>
               <button
-                className={`pb-3 text-xl transition-colors ${mode === "signin" ? "text-[#2d3142] border-b-2 border-[#6b9f9a]" : "text-[#a0aaa8]"}`}
+                className={`pb-3 text-base font-medium transition-colors ${mode === "signin" ? "text-[#2d3142] border-b-2 border-[#6b9f9a]" : "text-[#a0aaa8]"}`}
                 onClick={() => { setMode("signin"); setError(null); setInfo(null); }}
               >
                 iniciar sesión
               </button>
             </div>
 
-            <p className="text-[#6b7f7c] text-lg mb-6">
+            <p className="text-[#6b7f7c] text-sm mb-5 font-light">
               {mode === "signup"
                 ? "crea tu espacio — es gratis y confidencial"
                 : "continúa desde donde lo dejaste"}
             </p>
 
-            <form onSubmit={handleAuth} className="space-y-4">
+            <form onSubmit={handleAuth} className="space-y-3">
               {mode === "signup" && (
                 <input
                   className="modal-input"
@@ -191,13 +206,13 @@ export default function LandingPage() {
               />
 
               {error && (
-                <p className="text-sm text-rose-500 text-center">{error}</p>
+                <p className="text-xs text-rose-500 text-center pt-1">{error}</p>
               )}
               {info && (
-                <p className="text-sm text-[#6b9f9a] text-center">{info}</p>
+                <p className="text-xs text-[#6b9f9a] text-center pt-1">{info}</p>
               )}
 
-              <button type="submit" disabled={loading} className="primary-btn mt-2">
+              <button type="submit" disabled={loading} className="primary-btn mt-3">
                 {loading
                   ? "..."
                   : mode === "signup"
@@ -205,6 +220,10 @@ export default function LandingPage() {
                   : "entrar"}
               </button>
             </form>
+
+            <p className="text-xs text-[#b0bab8] text-center mt-5">
+              tus conversaciones son privadas y confidenciales
+            </p>
           </div>
         </div>
       )}

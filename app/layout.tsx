@@ -1,21 +1,28 @@
 import type { Metadata } from "next";
-import { Caveat } from "next/font/google";
+import { Lora, Inter } from "next/font/google";
 import "./globals.css";
 
-const cursive = Caveat({
+const display = Lora({
   subsets: ["latin"],
-  variable: "--font-cursive",
+  variable: "--font-display",
   weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+});
+
+const body = Inter({
+  subsets: ["latin"],
+  variable: "--font-body",
+  weight: ["300", "400", "500", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "Psicología — espacio para conversar",
+  title: "Espacio — un lugar para conversar",
   description: "Un espacio tranquilo para conversar.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={cursive.variable}>
+    <html lang="es" className={`${display.variable} ${body.variable}`}>
       <body>{children}</body>
     </html>
   );
