@@ -140,7 +140,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="gradient-bg min-h-screen flex flex-col">
+    <div className="gradient-bg min-h-[100dvh] flex flex-col">
       {/* Background blobs */}
       <div className="blob blob-1" />
       <div className="blob blob-2" />
