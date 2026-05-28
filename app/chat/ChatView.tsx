@@ -24,23 +24,30 @@ export default function ChatView({
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const pendingSent = useRef(false);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  async function send() {
-    const text = input.trim();
-    if (!text || sending) return;
-    setSending(true);
-    setInput("");
+  // Auto-send message that was typed on landing page before auth
+  useEffect(() => {
+    if (pendingSent.current) return;
+    const pending = sessionStorage.getItem("pendingMessage");
+    if (!pending) return;
+    sessionStorage.removeItem("pendingMessage");
+    pendingSent.current = true;
+    const timer = setTimeout(() => sendText(pending), 500);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    const optimisticUser: Message = {
-      id: `tmp-${Date.now()}`,
-      role: "user",
-      content: text,
-    };
-    setMessages((m) => [...m, optimisticUser]);
+  async function sendText(text: string) {
+    if (!text.trim() || sending) return;
+    setSending(true);
+
+    const optimistic: Message = { id: `tmp-${Date.now()}`, role: "user", content: text };
+    setMessages((m) => [...m, optimistic]);
 
     try {
       const res = await fetch("/api/chat", {
@@ -51,7 +58,7 @@ export default function ChatView({
       if (!res.ok) throw new Error("network");
       const data = await res.json();
       setMessages((m) => [
-        ...m.filter((x) => x.id !== optimisticUser.id),
+        ...m.filter((x) => x.id !== optimistic.id),
         { id: data.userMessageId, role: "user", content: text },
         { id: data.assistantMessageId, role: "assistant", content: data.reply },
       ]);
@@ -65,22 +72,34 @@ export default function ChatView({
     }
   }
 
+  async function send() {
+    const text = input.trim();
+    if (!text) return;
+    setInput("");
+    await sendText(text);
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
     router.push("/");
     router.refresh();
   }
 
+  const firstName = userName.split(" ")[0] || "tú";
+
   return (
     <main className="min-h-screen flex flex-col max-w-2xl mx-auto px-6">
-      <header className="flex justify-between items-center py-6 border-b border-line">
-        <h1 className="text-3xl">hola, {userName.split(" ")[0] || "tú"}</h1>
+      <header className="flex justify-between items-center py-5 border-b border-[#c8deda]">
+        <div>
+          <h1 className="text-3xl text-[#2d3142]">hola, {firstName}</h1>
+          <p className="text-sm text-[#a0aaa8] mt-0.5">tu espacio, siempre aquí</p>
+        </div>
         <span className="link text-lg" onClick={signOut}>salir</span>
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto py-8 space-y-6">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto py-8 space-y-5">
         {messages.length === 0 && (
-          <p className="text-center text-muted text-xl mt-20">
+          <p className="text-center text-[#a0aaa8] text-xl mt-20 leading-relaxed">
             cuéntame, ¿cómo te sientes hoy?
           </p>
         )}
@@ -92,8 +111,8 @@ export default function ChatView({
             <div
               className={`max-w-[80%] px-5 py-3 text-xl leading-relaxed ${
                 m.role === "user"
-                  ? "bg-ink text-paper rounded-2xl rounded-br-sm"
-                  : "text-ink"
+                  ? "bg-[#2d3142] text-[#f0f5f3] rounded-2xl rounded-br-sm"
+                  : "text-[#2d3142] bg-white/60 rounded-2xl rounded-bl-sm px-5 py-3 shadow-sm"
               }`}
             >
               {m.content}
@@ -102,12 +121,14 @@ export default function ChatView({
         ))}
         {sending && (
           <div className="flex justify-start">
-            <div className="text-muted text-xl">...</div>
+            <div className="text-[#a0aaa8] text-xl bg-white/60 rounded-2xl rounded-bl-sm px-5 py-3 shadow-sm">
+              <span className="animate-pulse">···</span>
+            </div>
           </div>
         )}
       </div>
 
-      <div className="border-t border-line py-5 flex gap-3 items-end">
+      <div className="border-t border-[#c8deda] py-4 flex gap-3 items-end">
         <textarea
           className="minimal-input resize-none"
           rows={1}
@@ -122,8 +143,11 @@ export default function ChatView({
           }}
           disabled={sending}
         />
-        <button className="minimal-btn" onClick={send} disabled={sending || !input.trim()}>
-          enviar
+        <button className="send-btn" onClick={send} disabled={sending || !input.trim()} aria-label="Enviar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
         </button>
       </div>
     </main>

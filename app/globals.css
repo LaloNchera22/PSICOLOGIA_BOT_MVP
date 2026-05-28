@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #fafaf7;
-  --foreground: #1a1a1a;
+  --background: #f0f5f3;
+  --foreground: #2d3142;
 }
 
 * { box-sizing: border-box; }
@@ -17,34 +17,192 @@ html, body {
   letter-spacing: 0.01em;
 }
 
-input, textarea, button {
-  font-family: inherit;
+input, textarea, button { font-family: inherit; }
+
+/* ── Landing gradient background ── */
+.gradient-bg {
+  background: linear-gradient(-45deg, #c8e6e0, #ddd5ef, #fce4d0, #cce3f0, #d8ecd6);
+  background-size: 400% 400%;
+  animation: gradient-flow 20s ease infinite;
+  position: relative;
+  overflow: hidden;
 }
 
+@keyframes gradient-flow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Floating background blobs */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.blob-1 {
+  width: 420px; height: 420px;
+  background: #9fd3ca;
+  top: -120px; left: -80px;
+  animation: blob-float 22s ease-in-out infinite;
+}
+.blob-2 {
+  width: 380px; height: 380px;
+  background: #c4b5e0;
+  bottom: -60px; right: -100px;
+  animation: blob-float 26s ease-in-out infinite reverse;
+  animation-delay: -8s;
+}
+.blob-3 {
+  width: 320px; height: 320px;
+  background: #f5c6a8;
+  bottom: 120px; left: 30%;
+  animation: blob-float 18s ease-in-out infinite;
+  animation-delay: -14s;
+}
+
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(18px, -14px) scale(1.04); }
+  66%       { transform: translate(-12px, 22px) scale(0.97); }
+}
+
+/* ── Glass card ── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 22px;
+  box-shadow:
+    0 8px 40px rgba(91, 168, 160, 0.10),
+    0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Send button (circle arrow) ── */
+.send-btn {
+  background: #6b9f9a;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 200ms ease, transform 150ms ease, opacity 200ms ease;
+  flex-shrink: 0;
+}
+.send-btn:hover:not(:disabled) { background: #528c88; transform: scale(1.06); }
+.send-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+
+/* ── Modal overlay ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 34, 50, 0.38);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 24px;
+  animation: fade-up 0.25s ease-out;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 38px 32px 34px;
+}
+
+/* ── Modal input ── */
+.modal-input {
+  background: rgba(245, 249, 248, 0.95);
+  border: 1px solid #c8deda;
+  border-radius: 10px;
+  outline: none;
+  padding: 13px 16px;
+  width: 100%;
+  font-size: 1.08rem;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+  color: #2d3142;
+}
+.modal-input:focus {
+  border-color: #6b9f9a;
+  box-shadow: 0 0 0 3px rgba(107, 159, 154, 0.18);
+}
+.modal-input::placeholder { color: #a0aaa8; }
+
+/* ── Primary button ── */
+.primary-btn {
+  background: #6b9f9a;
+  color: white;
+  border: none;
+  border-radius: 11px;
+  padding: 13px 24px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 200ms ease;
+  width: 100%;
+}
+.primary-btn:hover:not(:disabled) { background: #528c88; }
+.primary-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Chat page ── */
 .minimal-input {
   background: transparent;
   border: none;
-  border-bottom: 1px solid #d8d6cf;
+  border-bottom: 1px solid #c8deda;
   outline: none;
   padding: 8px 2px;
   width: 100%;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   transition: border-color 200ms ease;
+  color: #2d3142;
 }
-.minimal-input:focus { border-bottom-color: #1a1a1a; }
+.minimal-input:focus { border-bottom-color: #6b9f9a; }
 
 .minimal-btn {
   background: transparent;
-  border: 1px solid #1a1a1a;
+  border: 1px solid #6b9f9a;
+  color: #6b9f9a;
   padding: 10px 22px;
   font-size: 1.05rem;
   cursor: pointer;
+  border-radius: 9px;
   transition: background 200ms ease, color 200ms ease;
+  white-space: nowrap;
 }
-.minimal-btn:hover { background: #1a1a1a; color: #fafaf7; }
+.minimal-btn:hover:not(:disabled) { background: #6b9f9a; color: white; }
 .minimal-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-.link { color: #1a1a1a; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.link { color: #6b9f9a; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb { background: #d8d6cf; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #c8deda; border-radius: 3px; }
+
+/* ── Animations ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.55s ease-out both;
+}
+.animate-fade-up-delay {
+  animation: fade-up 0.55s ease-out 0.18s both;
+}
+.animate-fade-up-delay2 {
+  animation: fade-up 0.55s ease-out 0.32s both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

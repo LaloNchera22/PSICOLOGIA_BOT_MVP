@@ -8,10 +8,19 @@ const config: Config = {
         cursive: ["var(--font-cursive)", "cursive"],
       },
       colors: {
-        ink: "#1a1a1a",
-        paper: "#fafaf7",
-        muted: "#8a8a85",
-        line: "#e8e6df",
+        ink: "#2d3142",
+        paper: "#f0f5f3",
+        muted: "#a0aaa8",
+        line: "#c8deda",
+        teal: {
+          DEFAULT: "#6b9f9a",
+          dark: "#528c88",
+          light: "#c8e6e0",
+        },
+        lavender: {
+          DEFAULT: "#9b8bb4",
+          light: "#ddd5ef",
+        },
       },
     },
   },
