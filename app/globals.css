@@ -224,6 +224,26 @@ input, textarea, button { font-family: inherit; }
 .primary-btn:hover:not(:disabled) { background: #2e7470; }
 .primary-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 20px;
+  border: 1.5px solid #c8deda;
+  border-radius: 11px;
+  background: white;
+  color: #3d4a58;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 200ms ease, border-color 200ms ease;
+  letter-spacing: 0.01em;
+}
+.google-btn:hover:not(:disabled) { background: #f5faf9; border-color: #3d8c87; }
+.google-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
 /* ── Chat page ── */
 .minimal-input {
   background: transparent;
