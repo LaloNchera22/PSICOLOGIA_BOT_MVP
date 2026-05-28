@@ -160,29 +160,29 @@ export default function LandingPage() {
       </nav>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-16">
+      <div className="flex-1 flex flex-col items-center justify-center px-5 sm:px-8 py-10 sm:py-12">
         {/* Hero text */}
-        <div className="relative z-10 text-center mb-10 animate-fade-up">
-          <p className="text-xs text-[#3d8c87] mb-5 tracking-[0.3em] uppercase font-semibold">
+        <div className="relative z-10 text-center mb-8 sm:mb-10 animate-fade-up">
+          <p className="text-[0.65rem] sm:text-xs text-[#3d8c87] mb-4 sm:mb-5 tracking-[0.28em] sm:tracking-[0.35em] uppercase font-semibold">
             tu espacio
           </p>
-          <h1 className="font-display text-6xl md:text-7xl text-[#1a1f33] leading-tight mb-6 italic font-normal">
+          <h1 className="font-display text-[2.8rem] sm:text-6xl md:text-7xl text-[#1a1f33] leading-[1.15] mb-4 sm:mb-6 italic font-normal">
             un lugar para<br />conversar
           </h1>
-          <p className="text-base text-[#3d4a58] max-w-xs mx-auto leading-relaxed font-light">
+          <p className="text-sm sm:text-base text-[#3d4a58] max-w-[16rem] sm:max-w-xs mx-auto leading-relaxed font-light">
             aquí puedes hablar libremente —<br />escucho sin juzgar, sin prisa
           </p>
         </div>
 
-        {/* Input card — wider */}
-        <div className="relative z-10 glass-card w-full max-w-2xl p-6 animate-fade-up-delay">
+        {/* Input card */}
+        <div className="relative z-10 glass-card w-full max-w-xl sm:max-w-2xl p-4 sm:p-6 animate-fade-up-delay">
           {/* Animated placeholder when empty & unfocused */}
           {!input && !focused && (
             <div
               className="absolute pointer-events-none select-none"
-              style={{ top: "1.55rem", left: "1.5rem", right: "4rem" }}
+              style={{ top: "1.1rem", left: "1rem", right: "1rem" }}
             >
-              <span className="text-lg text-[#a8b8b6] leading-relaxed">
+              <span className="text-base sm:text-lg text-[#a8b8b6] leading-relaxed">
                 {animatedPlaceholder}
               </span>
               <span className="typewriter-cursor" />
@@ -191,8 +191,8 @@ export default function LandingPage() {
 
           <textarea
             ref={textareaRef}
-            className="w-full bg-transparent outline-none resize-none text-[#1a1f33] text-lg leading-relaxed"
-            rows={4}
+            className="w-full bg-transparent outline-none resize-none text-[#1a1f33] text-base sm:text-lg leading-relaxed"
+            rows={3}
             placeholder={focused && !input ? "¿qué te trae por aquí hoy?" : ""}
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -205,14 +205,14 @@ export default function LandingPage() {
               }
             }}
           />
-          <div className="flex items-center justify-end mt-3 pt-3 border-t border-white/40">
+          <div className="flex items-center justify-end mt-2 pt-2 sm:mt-3 sm:pt-3 border-t border-white/40">
             <button
               onClick={handleSend}
               disabled={!input.trim()}
               className="send-btn"
               aria-label="Enviar"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13" />
                 <polygon points="22 2 15 22 11 13 2 9 22 2" />
               </svg>

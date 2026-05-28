@@ -179,14 +179,20 @@ input, textarea, button { font-family: inherit; }
   color: white;
   border: none;
   border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background 200ms ease, transform 150ms ease, opacity 200ms ease;
   flex-shrink: 0;
+}
+@media (min-width: 640px) {
+  .send-btn {
+    width: 44px;
+    height: 44px;
+  }
 }
 .send-btn:hover:not(:disabled) { background: #2e7470; transform: scale(1.06); }
 .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
