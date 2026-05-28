@@ -57,10 +57,14 @@ export default function LandingPage() {
   const animatedPlaceholder = useTypewriter(PLACEHOLDERS);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) router.replace("/chat");
-    });
+    try {
+      const supabase = createClient();
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) router.replace("/chat");
+      }).catch(() => {});
+    } catch (e) {
+      console.error("Supabase init error – check env vars:", e);
+    }
   }, [router]);
 
   function openModal(m: "signin" | "signup") {
