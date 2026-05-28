@@ -30,7 +30,6 @@ export default function ChatView({
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  // Auto-send message that was typed on landing page before auth
   useEffect(() => {
     if (pendingSent.current) return;
     const pending = sessionStorage.getItem("pendingMessage");
@@ -88,18 +87,23 @@ export default function ChatView({
   const firstName = userName.split(" ")[0] || "tú";
 
   return (
-    <main className="min-h-screen flex flex-col max-w-2xl mx-auto px-6">
-      <header className="flex justify-between items-center py-5 border-b border-[#c8deda]">
-        <div>
-          <h1 className="text-3xl text-[#2d3142]">hola, {firstName}</h1>
-          <p className="text-sm text-[#a0aaa8] mt-0.5">tu espacio, siempre aquí</p>
+    <main className="min-h-screen flex flex-col max-w-2xl mx-auto">
+      {/* Nav header */}
+      <header className="flex justify-between items-center px-6 py-4 border-b border-[#e4edeb]">
+        <div className="flex items-center gap-3">
+          <span className="nav-brand text-sm">espacio</span>
+          <div className="w-px h-4 bg-[#d0dedd]" />
+          <span className="text-sm text-[#6b7f7c] font-light">hola, {firstName}</span>
         </div>
-        <span className="link text-lg" onClick={signOut}>salir</span>
+        <button className="nav-link-btn text-sm" onClick={signOut}>
+          salir
+        </button>
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto py-8 space-y-5">
+      {/* Messages */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto py-8 px-6 space-y-5">
         {messages.length === 0 && (
-          <p className="text-center text-[#a0aaa8] text-xl mt-20 leading-relaxed">
+          <p className="text-center text-[#b0bab8] text-base mt-20 leading-relaxed font-light">
             cuéntame, ¿cómo te sientes hoy?
           </p>
         )}
@@ -109,10 +113,10 @@ export default function ChatView({
             className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[80%] px-5 py-3 text-xl leading-relaxed ${
+              className={`max-w-[80%] px-5 py-3 text-base leading-relaxed ${
                 m.role === "user"
                   ? "bg-[#2d3142] text-[#f0f5f3] rounded-2xl rounded-br-sm"
-                  : "text-[#2d3142] bg-white/60 rounded-2xl rounded-bl-sm px-5 py-3 shadow-sm"
+                  : "text-[#2d3142] bg-white/80 rounded-2xl rounded-bl-sm shadow-sm border border-white/60"
               }`}
             >
               {m.content}
@@ -121,14 +125,15 @@ export default function ChatView({
         ))}
         {sending && (
           <div className="flex justify-start">
-            <div className="text-[#a0aaa8] text-xl bg-white/60 rounded-2xl rounded-bl-sm px-5 py-3 shadow-sm">
+            <div className="text-[#a0aaa8] text-base bg-white/80 rounded-2xl rounded-bl-sm px-5 py-3 shadow-sm border border-white/60">
               <span className="animate-pulse">···</span>
             </div>
           </div>
         )}
       </div>
 
-      <div className="border-t border-[#c8deda] py-4 flex gap-3 items-end">
+      {/* Input */}
+      <div className="border-t border-[#e4edeb] px-6 py-4 flex gap-3 items-end">
         <textarea
           className="minimal-input resize-none"
           rows={1}
@@ -143,8 +148,13 @@ export default function ChatView({
           }}
           disabled={sending}
         />
-        <button className="send-btn" onClick={send} disabled={sending || !input.trim()} aria-label="Enviar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <button
+          className="send-btn"
+          onClick={send}
+          disabled={sending || !input.trim()}
+          aria-label="Enviar"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13" />
             <polygon points="22 2 15 22 11 13 2 9 22 2" />
           </svg>

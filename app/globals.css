@@ -12,12 +12,16 @@
 html, body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-cursive), cursive;
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   letter-spacing: 0.01em;
 }
 
 input, textarea, button { font-family: inherit; }
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
 
 /* ── Landing gradient background ── */
 .gradient-bg {
@@ -69,6 +73,55 @@ input, textarea, button { font-family: inherit; }
   66%       { transform: translate(-12px, 22px) scale(0.97); }
 }
 
+/* ── Top navigation ── */
+.app-nav {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+}
+
+.nav-brand {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6b9f9a;
+}
+
+.nav-link-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #6b7f7c;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: color 150ms ease, background 150ms ease;
+  font-weight: 500;
+}
+.nav-link-btn:hover { color: #2d3142; background: rgba(255,255,255,0.35); }
+
+.nav-cta-btn {
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(107, 159, 154, 0.45);
+  color: #6b9f9a;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 20px;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+  backdrop-filter: blur(8px);
+}
+.nav-cta-btn:hover {
+  background: #6b9f9a;
+  color: white;
+  border-color: #6b9f9a;
+}
+
 /* ── Glass card ── */
 .glass-card {
   background: rgba(255, 255, 255, 0.72);
@@ -81,14 +134,14 @@ input, textarea, button { font-family: inherit; }
     0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
-/* ── Send button (circle arrow) ── */
+/* ── Send button ── */
 .send-btn {
   background: #6b9f9a;
   color: white;
   border: none;
   border-radius: 50%;
-  width: 46px;
-  height: 46px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,7 +150,7 @@ input, textarea, button { font-family: inherit; }
   flex-shrink: 0;
 }
 .send-btn:hover:not(:disabled) { background: #528c88; transform: scale(1.06); }
-.send-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+.send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* ── Modal overlay ── */
 .modal-overlay {
@@ -128,7 +181,7 @@ input, textarea, button { font-family: inherit; }
   outline: none;
   padding: 13px 16px;
   width: 100%;
-  font-size: 1.08rem;
+  font-size: 1rem;
   transition: border-color 200ms ease, box-shadow 200ms ease;
   color: #2d3142;
 }
@@ -145,10 +198,12 @@ input, textarea, button { font-family: inherit; }
   border: none;
   border-radius: 11px;
   padding: 13px 24px;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: background 200ms ease;
   width: 100%;
+  letter-spacing: 0.03em;
 }
 .primary-btn:hover:not(:disabled) { background: #528c88; }
 .primary-btn:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -161,29 +216,16 @@ input, textarea, button { font-family: inherit; }
   outline: none;
   padding: 8px 2px;
   width: 100%;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   transition: border-color 200ms ease;
   color: #2d3142;
 }
 .minimal-input:focus { border-bottom-color: #6b9f9a; }
 
-.minimal-btn {
-  background: transparent;
-  border: 1px solid #6b9f9a;
-  color: #6b9f9a;
-  padding: 10px 22px;
-  font-size: 1.05rem;
-  cursor: pointer;
-  border-radius: 9px;
-  transition: background 200ms ease, color 200ms ease;
-  white-space: nowrap;
-}
-.minimal-btn:hover:not(:disabled) { background: #6b9f9a; color: white; }
-.minimal-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.link { color: #6b9f9a; text-decoration: none; cursor: pointer; font-weight: 500; }
+.link:hover { color: #528c88; }
 
-.link { color: #6b9f9a; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
-
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: #c8deda; border-radius: 3px; }
 
 /* ── Animations ── */
@@ -200,9 +242,4 @@ input, textarea, button { font-family: inherit; }
 }
 .animate-fade-up-delay2 {
   animation: fade-up 0.55s ease-out 0.32s both;
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
 }
