@@ -87,7 +87,7 @@ export default function ChatView({
   const firstName = userName.split(" ")[0] || "tú";
 
   return (
-    <main className="min-h-screen flex flex-col max-w-2xl mx-auto">
+    <main className="h-[100dvh] flex flex-col max-w-2xl mx-auto w-full">
       {/* Nav header */}
       <header className="flex justify-between items-center px-6 py-4 border-b border-[#e4edeb]">
         <div className="flex items-center gap-3">
