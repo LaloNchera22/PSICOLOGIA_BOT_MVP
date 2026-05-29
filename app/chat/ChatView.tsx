@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { ThemeToggle, useTheme } from "../components/ThemeProvider";
 
 type Message = {
   id: string;
@@ -19,6 +21,7 @@ export default function ChatView({
   initialMessages: Message[];
 }) {
   const router = useRouter();
+  const { theme } = useTheme();
   const supabase = createClient();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
@@ -85,25 +88,44 @@ export default function ChatView({
   }
 
   const firstName = userName.split(" ")[0] || "tú";
+  const logoSrc = theme === "dark" ? "/logo-white.png" : "/logo-dark.png";
 
   return (
     <main className="h-[100dvh] flex flex-col max-w-2xl mx-auto w-full">
       {/* Nav header */}
-      <header className="flex justify-between items-center px-6 py-4 border-b border-[#e4edeb]">
+      <header className="chat-header flex justify-between items-center px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <span className="nav-brand text-sm">espacio</span>
-          <div className="w-px h-4 bg-[#d0dedd]" />
-          <span className="text-sm text-[#6b7f7c] font-light">hola, {firstName}</span>
+          <Image
+            src={logoSrc}
+            alt="KOGNT"
+            width={90}
+            height={26}
+            className="object-contain"
+          />
+          <div className="w-px h-4" style={{ background: "var(--border-strong)" }} />
+          <span className="text-sm font-light" style={{ color: "var(--fg-muted)" }}>
+            hola, {firstName}
+          </span>
         </div>
-        <button className="nav-link-btn text-sm" onClick={signOut}>
-          salir
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button className="nav-link-btn text-sm" onClick={signOut}>
+            salir
+          </button>
+        </div>
       </header>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto py-8 px-6 space-y-5">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto py-8 px-5 space-y-5"
+        style={{ background: "var(--bg)" }}
+      >
         {messages.length === 0 && (
-          <p className="text-center text-[#b0bab8] text-base mt-20 leading-relaxed font-light">
+          <p
+            className="text-center text-base mt-20 leading-relaxed font-light"
+            style={{ color: "var(--fg-muted)" }}
+          >
             cuéntame, ¿cómo te sientes hoy?
           </p>
         )}
@@ -112,20 +134,14 @@ export default function ChatView({
             key={m.id}
             className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
           >
-            <div
-              className={`max-w-[80%] px-5 py-3 text-base leading-relaxed ${
-                m.role === "user"
-                  ? "bg-[#2d3142] text-[#f0f5f3] rounded-2xl rounded-br-sm"
-                  : "text-[#2d3142] bg-white/80 rounded-2xl rounded-bl-sm shadow-sm border border-white/60"
-              }`}
-            >
+            <div className={m.role === "user" ? "bubble-user" : "bubble-assistant"}>
               {m.content}
             </div>
           </div>
         ))}
         {sending && (
           <div className="flex justify-start">
-            <div className="text-[#a0aaa8] text-base bg-white/80 rounded-2xl rounded-bl-sm px-5 py-3 shadow-sm border border-white/60">
+            <div className="bubble-typing">
               <span className="animate-pulse">···</span>
             </div>
           </div>
@@ -133,7 +149,7 @@ export default function ChatView({
       </div>
 
       {/* Input */}
-      <div className="border-t border-[#e4edeb] px-6 py-4 flex gap-3 items-end">
+      <div className="chat-input-area px-5 py-4 flex gap-3 items-end">
         <textarea
           className="minimal-input resize-none"
           rows={1}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "./components/ThemeProvider";
 
 const display = Playfair_Display({
   subsets: ["latin"],
@@ -16,14 +17,24 @@ const body = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Espacio — un lugar para conversar",
+  title: "KOGNT — un lugar para conversar",
   description: "Un espacio tranquilo para conversar.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${display.variable} ${body.variable}`}>
-      <body>{children}</body>
+    <html lang="es" className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Prevent flash of wrong theme */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('kognt-theme');if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}})()`,
+          }}
+        />
+      </head>
+      <body>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }
