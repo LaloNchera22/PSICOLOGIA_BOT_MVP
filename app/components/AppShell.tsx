@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,10 +16,14 @@ export interface AppUser {
 }
 
 interface SidebarCtxValue {
-  openSidebar: () => void;
+  sidebarOpen: boolean;
+  toggleSidebar: () => void;
 }
 
-const SidebarCtx = createContext<SidebarCtxValue>({ openSidebar: () => {} });
+const SidebarCtx = createContext<SidebarCtxValue>({
+  sidebarOpen: false,
+  toggleSidebar: () => {},
+});
 export const useSidebar = () => useContext(SidebarCtx);
 
 interface AppShellProps {
@@ -49,6 +53,13 @@ const MenuIcon = () => (
   </svg>
 );
 
+const CloseIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
+
 const NAV_ITEMS: {
   href: string;
   label: string;
@@ -58,11 +69,35 @@ const NAV_ITEMS: {
   { href: "/chat", label: "Chat", icon: <ChatIcon />, roles: ["user", "clinico"] },
 ];
 
+const SIDEBAR_PREF_KEY = "kognt-sidebar-open";
+
 export function AppShell({ user, children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { theme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Initialise from viewport + stored preference (open on desktop, closed on mobile)
+  useEffect(() => {
+    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+    const stored = localStorage.getItem(SIDEBAR_PREF_KEY);
+    setSidebarOpen(stored !== null ? stored === "true" : isDesktop);
+    setMounted(true);
+  }, []);
+
+  function toggleSidebar() {
+    setSidebarOpen((open) => {
+      const next = !open;
+      localStorage.setItem(SIDEBAR_PREF_KEY, String(next));
+      return next;
+    });
+  }
+
+  function closeSidebar() {
+    setSidebarOpen(false);
+    localStorage.setItem(SIDEBAR_PREF_KEY, "false");
+  }
 
   const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(user.role));
   const firstName = (user.name || "").split(" ")[0] || "—";
@@ -78,22 +113,31 @@ export function AppShell({ user, children }: AppShellProps) {
   }
 
   return (
-    <SidebarCtx.Provider value={{ openSidebar: () => setSidebarOpen(true) }}>
-      <div className="app-shell">
-        {/* Acid blur background blobs */}
+    <SidebarCtx.Provider value={{ sidebarOpen, toggleSidebar }}>
+      <div className={`app-shell${sidebarOpen ? " shell-sidebar-open" : ""}${mounted ? " shell-mounted" : ""}`}>
+        {/* Subtle ambient background */}
         <div className="shell-blob shell-blob-1" />
         <div className="shell-blob shell-blob-2" />
-        <div className="shell-blob shell-blob-3" />
 
         {/* Mobile sidebar overlay */}
-        {sidebarOpen && (
-          <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
-        )}
+        <div
+          className="sidebar-overlay"
+          onClick={closeSidebar}
+          aria-hidden={!sidebarOpen}
+        />
 
         {/* Sidebar */}
         <aside className={`app-sidebar${sidebarOpen ? " sidebar-open" : ""}`}>
           <div className="sidebar-logo">
-            <Image src={logoSrc} alt="KOGNT" width={80} height={24} className="object-contain" />
+            <Image src={logoSrc} alt="KOGNT" width={84} height={26} className="object-contain" priority />
+            <button
+              className="sidebar-close"
+              onClick={closeSidebar}
+              aria-label="Cerrar menú"
+              title="Cerrar menú"
+            >
+              <CloseIcon />
+            </button>
           </div>
 
           <nav className="sidebar-nav">
@@ -106,7 +150,9 @@ export function AppShell({ user, children }: AppShellProps) {
                   key={item.href}
                   href={item.href}
                   className={`sidebar-nav-item${isActive ? " sidebar-nav-active" : ""}`}
-                  onClick={() => setSidebarOpen(false)}
+                  onClick={() => {
+                    if (window.matchMedia("(max-width: 767px)").matches) closeSidebar();
+                  }}
                 >
                   <span className="sidebar-nav-icon">{item.icon}</span>
                   <span className="sidebar-nav-label">{item.label}</span>
@@ -138,41 +184,26 @@ export function AppShell({ user, children }: AppShellProps) {
         </aside>
 
         {/* Main content area */}
-        <main className="app-main">
-          {children}
-        </main>
-
-        {/* Mobile bottom nav */}
-        <nav className="mobile-bottom-nav" aria-label="Navegación principal">
-          {visibleItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`mobile-nav-item${isActive ? " mobile-nav-active" : ""}`}
-              >
-                {item.icon}
-                <span className="mobile-nav-label">{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+        <main className="app-main">{children}</main>
       </div>
     </SidebarCtx.Provider>
   );
 }
 
-/* ── Mobile menu button (use inside page headers) ── */
-export function MobileMenuBtn() {
-  const { openSidebar } = useSidebar();
+/* ── Menu toggle button (use inside page headers) ── */
+export function MenuBtn() {
+  const { toggleSidebar, sidebarOpen } = useSidebar();
   return (
     <button
-      className="mobile-menu-btn"
-      onClick={openSidebar}
-      aria-label="Abrir menú"
+      className="menu-btn"
+      onClick={toggleSidebar}
+      aria-label={sidebarOpen ? "Cerrar menú" : "Abrir menú"}
+      aria-expanded={sidebarOpen}
     >
       <MenuIcon />
     </button>
   );
 }
+
+/* Backwards-compatible alias */
+export const MobileMenuBtn = MenuBtn;
