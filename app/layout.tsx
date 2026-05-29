@@ -1,34 +1,32 @@
 import type { Metadata } from "next";
-import { Playfair_Display, DM_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./components/ThemeProvider";
 
-const display = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-display",
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-});
-
-const body = DM_Sans({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-body",
-  weight: ["300", "400", "500", "600"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "KOGNT — un lugar para conversar",
-  description: "Un espacio tranquilo para conversar.",
+  title: "KOGNT — a place to talk",
+  description: "A calm space to talk freely.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
-        {/* Prevent flash of wrong theme */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('kognt-theme');if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}})()`,
+            __html: `(function(){try{
+  var t=localStorage.getItem('kognt-theme');
+  if(t==='dark')document.documentElement.classList.add('dark');
+  var supported=['en','es','pt','fr','de','it'];
+  var l=(navigator.language||'en').split('-')[0].toLowerCase();
+  document.documentElement.setAttribute('lang',supported.indexOf(l)>=0?l:'en');
+}catch(e){}})()`,
           }}
         />
       </head>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle, useTheme } from "../components/ThemeProvider";
+import { detectLang, getT, type Lang } from "@/lib/i18n";
 
 type Message = {
   id: string;
@@ -23,11 +24,18 @@ export default function ChatView({
   const router = useRouter();
   const { theme } = useTheme();
   const supabase = createClient();
+  const [lang, setLang] = useState<Lang>("en");
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pendingSent = useRef(false);
+
+  useEffect(() => {
+    setLang(detectLang());
+  }, []);
+
+  const t = getT(lang);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -67,7 +75,7 @@ export default function ChatView({
     } catch {
       setMessages((m) => [
         ...m,
-        { id: `err-${Date.now()}`, role: "assistant", content: "lo siento, no pude responder ahora." },
+        { id: `err-${Date.now()}`, role: "assistant", content: t.chatError },
       ]);
     } finally {
       setSending(false);
@@ -87,7 +95,8 @@ export default function ChatView({
     router.refresh();
   }
 
-  const firstName = userName.split(" ")[0] || "tú";
+  const firstName = userName.split(" ")[0] || "—";
+  const greeting = t.chatGreeting.replace("{name}", firstName);
   const logoSrc = theme === "dark" ? "/logo-white.png" : "/logo-dark.png";
 
   return (
@@ -104,13 +113,13 @@ export default function ChatView({
           />
           <div className="w-px h-4" style={{ background: "var(--border-strong)" }} />
           <span className="text-sm font-light" style={{ color: "var(--fg-muted)" }}>
-            hola, {firstName}
+            {greeting}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <button className="nav-link-btn text-sm" onClick={signOut}>
-            salir
+            {t.chatSignOut}
           </button>
         </div>
       </header>
@@ -126,7 +135,7 @@ export default function ChatView({
             className="text-center text-base mt-20 leading-relaxed font-light"
             style={{ color: "var(--fg-muted)" }}
           >
-            cuéntame, ¿cómo te sientes hoy?
+            {t.chatEmpty}
           </p>
         )}
         {messages.map((m) => (
@@ -153,7 +162,7 @@ export default function ChatView({
         <textarea
           className="minimal-input resize-none"
           rows={1}
-          placeholder="escribe aquí..."
+          placeholder={t.chatInputPlaceholder}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -168,7 +177,7 @@ export default function ChatView({
           className="send-btn"
           onClick={send}
           disabled={sending || !input.trim()}
-          aria-label="Enviar"
+          aria-label={t.sendLabel}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13" />
