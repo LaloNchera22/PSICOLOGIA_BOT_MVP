@@ -1,11 +1,10 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { ThemeToggle, useTheme } from "./ThemeProvider";
+import { useTheme } from "./ThemeProvider";
 
 export type UserRole = "user" | "clinico";
 
@@ -15,27 +14,10 @@ export interface AppUser {
   role: UserRole;
 }
 
-interface SidebarCtxValue {
-  sidebarOpen: boolean;
-  toggleSidebar: () => void;
-}
-
-const SidebarCtx = createContext<SidebarCtxValue>({
-  sidebarOpen: false,
-  toggleSidebar: () => {},
-});
-export const useSidebar = () => useContext(SidebarCtx);
-
 interface AppShellProps {
   user: AppUser;
   children: React.ReactNode;
 }
-
-const ChatIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-  </svg>
-);
 
 const LogoutIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -45,65 +27,53 @@ const LogoutIcon = () => (
   </svg>
 );
 
-const MenuIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="3" y1="6" x2="21" y2="6"/>
-    <line x1="3" y1="12" x2="21" y2="12"/>
-    <line x1="3" y1="18" x2="21" y2="18"/>
+const ConfigIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
   </svg>
 );
-
-const CloseIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18"/>
-    <line x1="6" y1="6" x2="18" y2="18"/>
-  </svg>
-);
-
-const NAV_ITEMS: {
-  href: string;
-  label: string;
-  icon: React.ReactNode;
-  roles: UserRole[];
-}[] = [
-  { href: "/chat", label: "Chat", icon: <ChatIcon />, roles: ["user", "clinico"] },
-];
-
-const SIDEBAR_PREF_KEY = "kognt-sidebar-open";
 
 export function AppShell({ user, children }: AppShellProps) {
-  const pathname = usePathname();
+  return (
+    <div className="app-shell shell-mounted">
+      {/* Subtle ambient background */}
+      <div className="shell-blob shell-blob-1" />
+      <div className="shell-blob shell-blob-2" />
+
+      {/* Main content area */}
+      <main className="app-main">{children}</main>
+    </div>
+  );
+}
+
+/* ── Config menu (gear button + dropdown) for page headers ── */
+export function ConfigMenu({ user }: { user: AppUser }) {
   const router = useRouter();
-  const { theme } = useTheme();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Initialise from viewport + stored preference (open on desktop, closed on mobile)
-  useEffect(() => {
-    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
-    const stored = localStorage.getItem(SIDEBAR_PREF_KEY);
-    setSidebarOpen(stored !== null ? stored === "true" : isDesktop);
-    setMounted(true);
-  }, []);
-
-  function toggleSidebar() {
-    setSidebarOpen((open) => {
-      const next = !open;
-      localStorage.setItem(SIDEBAR_PREF_KEY, String(next));
-      return next;
-    });
-  }
-
-  function closeSidebar() {
-    setSidebarOpen(false);
-    localStorage.setItem(SIDEBAR_PREF_KEY, "false");
-  }
-
-  const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(user.role));
   const firstName = (user.name || "").split(" ")[0] || "—";
   const rawInitials = (user.name || user.email || "??").replace(/\s+/g, "").slice(0, 2).toUpperCase();
-  const logoSrc = theme === "dark" ? "/logo-white.png" : "/logo-dark.png";
   const roleLabel = user.role === "clinico" ? "Clínico" : "Usuario";
+
+  useEffect(() => {
+    if (!open) return;
+    function onClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   async function signOut() {
     const supabase = createClient();
@@ -113,97 +83,41 @@ export function AppShell({ user, children }: AppShellProps) {
   }
 
   return (
-    <SidebarCtx.Provider value={{ sidebarOpen, toggleSidebar }}>
-      <div className={`app-shell${sidebarOpen ? " shell-sidebar-open" : ""}${mounted ? " shell-mounted" : ""}`}>
-        {/* Subtle ambient background */}
-        <div className="shell-blob shell-blob-1" />
-        <div className="shell-blob shell-blob-2" />
+    <div className="config-menu" ref={menuRef}>
+      <button
+        className="config-btn"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Configuración"
+        aria-expanded={open}
+        title="Configuración"
+      >
+        <ConfigIcon />
+      </button>
 
-        {/* Mobile sidebar overlay */}
-        <div
-          className="sidebar-overlay"
-          onClick={closeSidebar}
-          aria-hidden={!sidebarOpen}
-        />
-
-        {/* Sidebar */}
-        <aside className={`app-sidebar${sidebarOpen ? " sidebar-open" : ""}`}>
-          <div className="sidebar-logo">
-            <Image src={logoSrc} alt="KOGNT" width={84} height={26} className="object-contain" priority />
-            <button
-              className="sidebar-close"
-              onClick={closeSidebar}
-              aria-label="Cerrar menú"
-              title="Cerrar menú"
-            >
-              <CloseIcon />
-            </button>
-          </div>
-
-          <nav className="sidebar-nav">
-            {visibleItems.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/chat" && pathname.startsWith(item.href + "/"));
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`sidebar-nav-item${isActive ? " sidebar-nav-active" : ""}`}
-                  onClick={() => {
-                    if (window.matchMedia("(max-width: 767px)").matches) closeSidebar();
-                  }}
-                >
-                  <span className="sidebar-nav-icon">{item.icon}</span>
-                  <span className="sidebar-nav-label">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="sidebar-footer">
-            <div className="sidebar-user">
-              <div className="sidebar-avatar">{rawInitials}</div>
-              <div className="sidebar-user-info">
-                <div className="sidebar-user-name">{firstName}</div>
-                <div className="sidebar-user-role">{roleLabel}</div>
-              </div>
-            </div>
-            <div className="sidebar-actions">
-              <ThemeToggle />
-              <button
-                className="sidebar-signout"
-                onClick={signOut}
-                title="Cerrar sesión"
-                aria-label="Cerrar sesión"
-              >
-                <LogoutIcon />
-              </button>
+      {open && (
+        <div className="config-dropdown" role="menu">
+          <div className="config-user">
+            <div className="config-avatar">{rawInitials}</div>
+            <div className="config-user-info">
+              <div className="config-user-name">{firstName}</div>
+              <div className="config-user-role">{roleLabel}</div>
             </div>
           </div>
-        </aside>
-
-        {/* Main content area */}
-        <main className="app-main">{children}</main>
-      </div>
-    </SidebarCtx.Provider>
+          <button className="config-item config-signout" onClick={signOut} role="menuitem">
+            <LogoutIcon />
+            <span>Cerrar sesión</span>
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
-/* ── Menu toggle button (use inside page headers) ── */
-export function MenuBtn() {
-  const { toggleSidebar, sidebarOpen } = useSidebar();
+/* ── Header logo ── */
+export function HeaderLogo() {
+  const { theme } = useTheme();
+  const logoSrc = theme === "dark" ? "/logo-white.png" : "/logo-dark.png";
   return (
-    <button
-      className="menu-btn"
-      onClick={toggleSidebar}
-      aria-label={sidebarOpen ? "Cerrar menú" : "Abrir menú"}
-      aria-expanded={sidebarOpen}
-    >
-      <MenuIcon />
-    </button>
+    <Image src={logoSrc} alt="KOGNT" width={92} height={28} className="header-logo object-contain" priority />
   );
 }
-
-/* Backwards-compatible alias */
-export const MobileMenuBtn = MenuBtn;
