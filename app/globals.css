@@ -516,3 +516,15 @@ input, textarea, button { font-family: inherit; }
 @media (min-width: 640px) {
   .accent-label { font-size: 0.75rem; letter-spacing: 0.35em; }
 }
+
+/* ── Brutalist utilities ── */
+.brutal-card { background: #000; border: 1px solid rgba(255,255,255,0.1); padding: 24px; }
+
+.brutal-table { width: 100%; border-collapse: collapse; }
+.brutal-table th { text-align: left; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.4); padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.brutal-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.9rem; color: rgba(255,255,255,0.85); }
+.brutal-table tr:last-child td { border-bottom: none; }
+
+.brutal-input { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: white; padding: 10px 14px; font-size: 0.95rem; outline: none; width: 100%; transition: border-color 150ms ease; }
+.brutal-input:focus { border-color: var(--accent); }
+.brutal-input::placeholder { color: rgba(255,255,255,0.3); }
