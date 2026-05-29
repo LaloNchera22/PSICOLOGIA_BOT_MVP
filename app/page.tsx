@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { ThemeToggle, useTheme } from "./components/ThemeProvider";
 
 const PLACEHOLDERS = [
   "¿qué te trae por aquí hoy?",
@@ -42,6 +44,7 @@ function useTypewriter(phrases: string[]) {
 
 export default function LandingPage() {
   const router = useRouter();
+  const { theme } = useTheme();
   const [input, setInput] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState<"signin" | "signup">("signup");
@@ -89,9 +92,7 @@ export default function LandingPage() {
       if (pending) sessionStorage.setItem("pendingMessage", pending);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
       });
       if (error) throw error;
     } catch (err: unknown) {
@@ -139,6 +140,8 @@ export default function LandingPage() {
     }
   }
 
+  const logoSrc = theme === "dark" ? "/logo-white.png" : "/logo-dark.png";
+
   return (
     <div className="gradient-bg min-h-[100dvh] flex flex-col">
       {/* Background blobs */}
@@ -148,8 +151,18 @@ export default function LandingPage() {
 
       {/* Top navigation */}
       <nav className="app-nav animate-fade-up">
-        <span className="nav-brand">espacio</span>
-        <div className="flex items-center gap-3">
+        <span className="nav-brand">
+          <Image
+            src={logoSrc}
+            alt="KOGNT"
+            width={140}
+            height={38}
+            className="kognt-logo"
+            priority
+          />
+        </span>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <ThemeToggle />
           <button className="nav-link-btn" onClick={() => openModal("signin")}>
             iniciar sesión
           </button>
@@ -163,13 +176,19 @@ export default function LandingPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-5 sm:px-8 py-10 sm:py-12">
         {/* Hero text */}
         <div className="relative z-10 text-center mb-8 sm:mb-10 animate-fade-up">
-          <p className="text-[0.65rem] sm:text-xs text-[#3d8c87] mb-4 sm:mb-5 tracking-[0.28em] sm:tracking-[0.35em] uppercase font-semibold">
+          <p className="accent-label mb-4 sm:mb-5">
             tu espacio
           </p>
-          <h1 className="font-display text-[2.8rem] sm:text-6xl md:text-7xl text-[#1a1f33] leading-[1.15] mb-4 sm:mb-6 italic font-normal">
+          <h1
+            className="font-display text-[2.8rem] sm:text-6xl md:text-7xl leading-[1.15] mb-4 sm:mb-6 italic font-normal"
+            style={{ color: "var(--fg)" }}
+          >
             un lugar para<br />conversar
           </h1>
-          <p className="text-sm sm:text-base text-[#3d4a58] max-w-[16rem] sm:max-w-xs mx-auto leading-relaxed font-light">
+          <p
+            className="text-sm sm:text-base max-w-[16rem] sm:max-w-xs mx-auto leading-relaxed font-light"
+            style={{ color: "var(--fg-2)" }}
+          >
             aquí puedes hablar libremente —<br />escucho sin juzgar, sin prisa
           </p>
         </div>
@@ -182,7 +201,10 @@ export default function LandingPage() {
               className="absolute pointer-events-none select-none"
               style={{ top: "1.1rem", left: "1rem", right: "1rem" }}
             >
-              <span className="text-base sm:text-lg text-[#a8b8b6] leading-relaxed">
+              <span
+                className="text-base sm:text-lg leading-relaxed"
+                style={{ color: "var(--fg-muted)" }}
+              >
                 {animatedPlaceholder}
               </span>
               <span className="typewriter-cursor" />
@@ -191,7 +213,8 @@ export default function LandingPage() {
 
           <textarea
             ref={textareaRef}
-            className="w-full bg-transparent outline-none resize-none text-[#1a1f33] text-base sm:text-lg leading-relaxed"
+            className="w-full bg-transparent outline-none resize-none text-base sm:text-lg leading-relaxed"
+            style={{ color: "var(--fg)" }}
             rows={3}
             placeholder={focused && !input ? "¿qué te trae por aquí hoy?" : ""}
             value={input}
@@ -205,7 +228,10 @@ export default function LandingPage() {
               }
             }}
           />
-          <div className="flex items-center justify-end mt-2 pt-2 sm:mt-3 sm:pt-3 border-t border-white/40">
+          <div
+            className="flex items-center justify-end mt-2 pt-2 sm:mt-3 sm:pt-3"
+            style={{ borderTop: "1px solid var(--border)" }}
+          >
             <button
               onClick={handleSend}
               disabled={!input.trim()}
@@ -234,23 +260,37 @@ export default function LandingPage() {
           }}
         >
           <div className="glass-card modal-card">
+            {/* Logo inside modal */}
+            <div className="flex justify-center mb-6">
+              <Image
+                src={logoSrc}
+                alt="KOGNT"
+                width={100}
+                height={28}
+                className="object-contain"
+              />
+            </div>
+
             {/* Tabs */}
-            <div className="flex gap-6 mb-7 border-b border-[#c8deda]">
+            <div
+              className="flex gap-6 mb-7"
+              style={{ borderBottom: "1px solid var(--border-strong)" }}
+            >
               <button
-                className={`pb-3 text-base font-semibold transition-colors ${mode === "signup" ? "text-[#1a1f33] border-b-2 border-[#3d8c87]" : "text-[#8a9a9a]"}`}
+                className={mode === "signup" ? "tab-active" : "tab-inactive"}
                 onClick={() => { setMode("signup"); setError(null); setInfo(null); }}
               >
                 crear cuenta
               </button>
               <button
-                className={`pb-3 text-base font-semibold transition-colors ${mode === "signin" ? "text-[#1a1f33] border-b-2 border-[#3d8c87]" : "text-[#8a9a9a]"}`}
+                className={mode === "signin" ? "tab-active" : "tab-inactive"}
                 onClick={() => { setMode("signin"); setError(null); setInfo(null); }}
               >
                 iniciar sesión
               </button>
             </div>
 
-            <p className="text-[#3d4a58] text-sm mb-5 font-light">
+            <p className="text-sm mb-5 font-light" style={{ color: "var(--fg-2)" }}>
               {mode === "signup"
                 ? "crea tu espacio — es gratis y confidencial"
                 : "continúa desde donde lo dejaste"}
@@ -273,9 +313,9 @@ export default function LandingPage() {
             </button>
 
             <div className="flex items-center gap-3 my-4">
-              <div className="flex-1 h-px bg-[#c8deda]" />
-              <span className="text-xs text-[#8a9a9a]">o</span>
-              <div className="flex-1 h-px bg-[#c8deda]" />
+              <div className="flex-1 h-px" style={{ background: "var(--border-strong)" }} />
+              <span className="divider-text">o</span>
+              <div className="flex-1 h-px" style={{ background: "var(--border-strong)" }} />
             </div>
 
             <form onSubmit={handleAuth} className="space-y-3">
@@ -307,10 +347,10 @@ export default function LandingPage() {
               />
 
               {error && (
-                <p className="text-xs text-rose-600 text-center pt-1">{error}</p>
+                <p className="text-xs text-rose-500 text-center pt-1">{error}</p>
               )}
               {info && (
-                <p className="text-xs text-[#3d8c87] text-center pt-1">{info}</p>
+                <p className="text-xs text-center pt-1" style={{ color: "var(--accent)" }}>{info}</p>
               )}
 
               <button type="submit" disabled={loading} className="primary-btn mt-3">
@@ -322,7 +362,7 @@ export default function LandingPage() {
               </button>
             </form>
 
-            <p className="text-xs text-[#8a9a9a] text-center mt-5">
+            <p className="text-xs text-center mt-5" style={{ color: "var(--fg-muted)" }}>
               tus conversaciones son privadas y confidenciales
             </p>
           </div>
