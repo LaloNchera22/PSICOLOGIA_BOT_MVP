@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "../components/ThemeProvider";
-import { AppShell, MenuBtn, type AppUser } from "../components/AppShell";
+import { AppShell, ConfigMenu, HeaderLogo, type AppUser } from "../components/AppShell";
 import { detectLang, getT, type Lang } from "@/lib/i18n";
 
 type Message = {
@@ -107,36 +107,12 @@ export default function ChatView({
     <AppShell user={user}>
       {/* Chat header */}
       <header className="chat-header-new">
-        <MenuBtn />
-
-        <div className="chat-header-center">
-          <div className="chat-header-avatar">
-            <svg
-              width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2"
-              strokeLinecap="round" strokeLinejoin="round"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-            <span className="status-pulse" aria-hidden="true" />
-          </div>
-          <div className="chat-header-text">
-            <div className="chat-header-title">Asistente KOGNT</div>
-            <div className="chat-header-subtitle">
-              <svg
-                width="11" height="11" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2.2"
-                strokeLinecap="round" strokeLinejoin="round"
-              >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-              <span>{t.privacyNote}</span>
-            </div>
-          </div>
+        <div className="chat-header-brand">
+          <HeaderLogo />
         </div>
 
         <div className="chat-header-actions">
+          <ConfigMenu user={user} />
           <ThemeToggle />
         </div>
       </header>
