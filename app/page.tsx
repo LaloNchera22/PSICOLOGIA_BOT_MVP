@@ -5,23 +5,27 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle, useTheme } from "./components/ThemeProvider";
-
-const PLACEHOLDERS = [
-  "¿qué te trae por aquí hoy?",
-  "cuéntame, ¿cómo te sientes?",
-  "¿hay algo que te pesa últimamente?",
-  "¿qué tienes en mente?",
-  "¿en qué puedo acompañarte hoy?",
-];
+import { detectLang, getT, type Lang } from "@/lib/i18n";
 
 function useTypewriter(phrases: string[]) {
   const [displayed, setDisplayed] = useState("");
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [charIdx, setCharIdx] = useState(0);
   const [deleting, setDeleting] = useState(false);
+  const prevPhrasesRef = useRef(phrases);
 
   useEffect(() => {
-    const phrase = phrases[phraseIdx];
+    if (prevPhrasesRef.current !== phrases) {
+      prevPhrasesRef.current = phrases;
+      setPhraseIdx(0);
+      setCharIdx(0);
+      setDeleting(false);
+      setDisplayed("");
+    }
+  }, [phrases]);
+
+  useEffect(() => {
+    const phrase = phrases[phraseIdx] ?? "";
     let timeout: ReturnType<typeof setTimeout>;
 
     if (!deleting && charIdx < phrase.length) {
@@ -45,6 +49,7 @@ function useTypewriter(phrases: string[]) {
 export default function LandingPage() {
   const router = useRouter();
   const { theme } = useTheme();
+  const [lang, setLang] = useState<Lang>("en");
   const [input, setInput] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState<"signin" | "signup">("signup");
@@ -57,7 +62,12 @@ export default function LandingPage() {
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const animatedPlaceholder = useTypewriter(PLACEHOLDERS);
+  useEffect(() => {
+    setLang(detectLang());
+  }, []);
+
+  const t = getT(lang);
+  const animatedPlaceholder = useTypewriter(t.placeholders);
 
   useEffect(() => {
     try {
@@ -96,7 +106,7 @@ export default function LandingPage() {
       });
       if (error) throw error;
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Algo salió mal.";
+      const msg = err instanceof Error ? err.message : t.errorGeneric;
       setError(msg);
       setLoading(false);
     }
@@ -123,7 +133,7 @@ export default function LandingPage() {
           router.push("/chat");
           router.refresh();
         } else {
-          setInfo("Revisa tu correo para confirmar la cuenta.");
+          setInfo(t.checkEmail);
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -133,7 +143,7 @@ export default function LandingPage() {
         router.refresh();
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Algo salió mal.";
+      const msg = err instanceof Error ? err.message : t.errorGeneric;
       setError(msg);
     } finally {
       setLoading(false);
@@ -164,10 +174,10 @@ export default function LandingPage() {
         <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
           <button className="nav-link-btn" onClick={() => openModal("signin")}>
-            iniciar sesión
+            {t.navSignIn}
           </button>
           <button className="nav-cta-btn" onClick={() => openModal("signup")}>
-            crear cuenta
+            {t.navSignUp}
           </button>
         </div>
       </nav>
@@ -177,30 +187,27 @@ export default function LandingPage() {
         {/* Hero text */}
         <div className="relative z-10 text-center mb-8 sm:mb-10 animate-fade-up">
           <p className="accent-label mb-4 sm:mb-5">
-            tu espacio
+            {t.accentLabel}
           </p>
           <h1
-            className="font-display text-[2.8rem] sm:text-6xl md:text-7xl leading-[1.15] mb-4 sm:mb-6 italic font-normal"
+            className="font-display text-[2.8rem] sm:text-6xl md:text-7xl leading-[1.15] mb-4 sm:mb-6 font-light"
             style={{ color: "var(--fg)" }}
           >
-            un lugar para<br />conversar
+            {t.heroTitle}<br />{t.heroLine2}
           </h1>
           <p
             className="text-sm sm:text-base max-w-[16rem] sm:max-w-xs mx-auto leading-relaxed font-light"
             style={{ color: "var(--fg-2)" }}
           >
-            aquí puedes hablar libremente —<br />escucho sin juzgar, sin prisa
+            {t.heroSubtitle}<br />{t.heroSubtitleLine2}
           </p>
         </div>
 
         {/* Input card */}
         <div className="relative z-10 glass-card w-full max-w-xl sm:max-w-2xl p-4 sm:p-6 animate-fade-up-delay">
-          {/* Animated placeholder when empty & unfocused */}
+          {/* Animated placeholder aligned with textarea */}
           {!input && !focused && (
-            <div
-              className="absolute pointer-events-none select-none"
-              style={{ top: "1.1rem", left: "1rem", right: "1rem" }}
-            >
+            <div className="absolute pointer-events-none select-none top-4 left-4 right-4 sm:top-6 sm:left-6 sm:right-6">
               <span
                 className="text-base sm:text-lg leading-relaxed"
                 style={{ color: "var(--fg-muted)" }}
@@ -215,8 +222,8 @@ export default function LandingPage() {
             ref={textareaRef}
             className="w-full bg-transparent outline-none resize-none text-base sm:text-lg leading-relaxed"
             style={{ color: "var(--fg)" }}
-            rows={3}
-            placeholder={focused && !input ? "¿qué te trae por aquí hoy?" : ""}
+            rows={2}
+            placeholder={focused && !input ? t.placeholders[0] : ""}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onFocus={() => setFocused(true)}
@@ -228,15 +235,12 @@ export default function LandingPage() {
               }
             }}
           />
-          <div
-            className="flex items-center justify-end mt-2 pt-2 sm:mt-3 sm:pt-3"
-            style={{ borderTop: "1px solid var(--border)" }}
-          >
+          <div className="flex items-center justify-end mt-2 sm:mt-3">
             <button
               onClick={handleSend}
               disabled={!input.trim()}
               className="send-btn"
-              aria-label="Enviar"
+              aria-label={t.sendLabel}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13" />
@@ -280,20 +284,18 @@ export default function LandingPage() {
                 className={mode === "signup" ? "tab-active" : "tab-inactive"}
                 onClick={() => { setMode("signup"); setError(null); setInfo(null); }}
               >
-                crear cuenta
+                {t.modalSignUp}
               </button>
               <button
                 className={mode === "signin" ? "tab-active" : "tab-inactive"}
                 onClick={() => { setMode("signin"); setError(null); setInfo(null); }}
               >
-                iniciar sesión
+                {t.modalSignIn}
               </button>
             </div>
 
             <p className="text-sm mb-5 font-light" style={{ color: "var(--fg-2)" }}>
-              {mode === "signup"
-                ? "crea tu espacio — es gratis y confidencial"
-                : "continúa desde donde lo dejaste"}
+              {mode === "signup" ? t.modalSubSignUp : t.modalSubSignIn}
             </p>
 
             {/* Google OAuth button */}
@@ -309,7 +311,7 @@ export default function LandingPage() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              continuar con Google
+              {t.googleBtn}
             </button>
 
             <div className="flex items-center gap-3 my-4">
@@ -322,7 +324,7 @@ export default function LandingPage() {
               {mode === "signup" && (
                 <input
                   className="modal-input"
-                  placeholder="¿cómo te llamas?"
+                  placeholder={t.namePlaceholder}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -331,7 +333,7 @@ export default function LandingPage() {
               <input
                 className="modal-input"
                 type="email"
-                placeholder="correo electrónico"
+                placeholder={t.emailPlaceholder}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -339,7 +341,7 @@ export default function LandingPage() {
               <input
                 className="modal-input"
                 type="password"
-                placeholder="contraseña (mín. 6 caracteres)"
+                placeholder={t.passwordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -357,13 +359,13 @@ export default function LandingPage() {
                 {loading
                   ? "..."
                   : mode === "signup"
-                  ? "empezar"
-                  : "entrar"}
+                  ? t.submitSignUp
+                  : t.submitSignIn}
               </button>
             </form>
 
             <p className="text-xs text-center mt-5" style={{ color: "var(--fg-muted)" }}>
-              tus conversaciones son privadas y confidenciales
+              {t.privacyNote}
             </p>
           </div>
         </div>
