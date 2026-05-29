@@ -101,7 +101,6 @@ export default function ChatView({
   }
 
   const firstName = (user.name || "").split(" ")[0] || "—";
-  const rawInitials = (user.name || user.email || "??").replace(/\s+/g, "").slice(0, 2).toUpperCase();
 
   return (
     <AppShell user={user}>
@@ -169,9 +168,6 @@ export default function ChatView({
             <div className={m.role === "user" ? "bubble-user" : "bubble-assistant"}>
               {m.content}
             </div>
-            {m.role === "user" && (
-              <div className="msg-avatar msg-avatar-user">{rawInitials}</div>
-            )}
           </div>
         ))}
 
@@ -189,7 +185,15 @@ export default function ChatView({
 
       {/* Input */}
       <div className="input-area">
-        <div className="input-container">
+        <div
+          className="input-container"
+          onMouseDown={(e) => {
+            if (e.target !== textareaRef.current) {
+              e.preventDefault();
+              textareaRef.current?.focus();
+            }
+          }}
+        >
           <textarea
             ref={textareaRef}
             className="chat-input-field"
