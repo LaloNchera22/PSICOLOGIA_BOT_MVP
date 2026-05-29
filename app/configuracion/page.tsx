@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import ConfigView from "./ConfigView";
 import type { AppUser } from "../components/AppShell";
+import { normalizeRole } from "@/lib/portal";
 
 export default async function ConfiguracionPage() {
   const supabase = createClient();
@@ -23,10 +24,7 @@ export default async function ConfiguracionPage() {
       profile?.full_name ||
       "",
     email: user.email || "",
-    role:
-      (user.user_metadata?.role as AppUser["role"]) === "clinico"
-        ? "clinico"
-        : "user",
+    role: normalizeRole(user.user_metadata?.role),
   };
 
   const initialName = appUser.name;

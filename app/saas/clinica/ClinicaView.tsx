@@ -1,7 +1,7 @@
 "use client";
 
-import { AppShell, MobileMenuBtn, type AppUser } from "../components/AppShell";
-import { ThemeToggle } from "../components/ThemeProvider";
+import { SaasMenuBtn } from "@/app/components/SaasShell";
+import { ThemeToggle } from "@/app/components/ThemeProvider";
 
 interface PatientRow {
   patientId: string;
@@ -29,16 +29,8 @@ function RiskBadge({ score }: { score: number }) {
   const label = score <= 3 ? "Bajo" : score <= 6 ? "Medio" : "Alto";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <div
-        className="risk-dot"
-        style={{
-          background: color,
-          boxShadow: `0 0 8px ${color}80`,
-        }}
-      />
-      <span style={{ fontFamily: "monospace", fontSize: "0.82rem", color: "var(--fg-2)" }}>
-        {score}/10
-      </span>
+      <div className="risk-dot" style={{ background: color, boxShadow: `0 0 8px ${color}80` }} />
+      <span style={{ fontFamily: "monospace", fontSize: "0.82rem", color: "var(--fg-2)" }}>{score}/10</span>
       <span
         style={{
           fontSize: "0.65rem",
@@ -66,14 +58,7 @@ function StatusBadge({ status }: { status: PatientRow["status"] }) {
   };
   const s = map[status];
   return (
-    <span
-      className="status-badge"
-      style={{
-        color: s.color,
-        border: `1px solid ${s.color}50`,
-        background: `${s.color}12`,
-      }}
-    >
+    <span className="status-badge" style={{ color: s.color, border: `1px solid ${s.color}50`, background: `${s.color}12` }}>
       {s.label}
     </span>
   );
@@ -81,18 +66,19 @@ function StatusBadge({ status }: { status: PatientRow["status"] }) {
 
 function sessionColor(type: AppointmentSlot["sessionType"]): string {
   switch (type) {
-    case "seguimiento": return "var(--accent)";
-    case "crisis": return "#ef4444";
-    case "inicial": return "var(--accent-2)";
+    case "seguimiento":
+      return "var(--accent)";
+    case "crisis":
+      return "#ef4444";
+    case "inicial":
+      return "var(--accent-2)";
   }
 }
 
 export default function ClinicaView({
-  user,
   patients,
   appointments,
 }: {
-  user: AppUser;
   patients: PatientRow[];
   appointments: AppointmentSlot[];
 }) {
@@ -100,27 +86,22 @@ export default function ClinicaView({
   const activeCount = patients.filter((p) => p.status === "activo").length;
 
   return (
-    <AppShell user={user}>
+    <>
       {/* Mobile top bar */}
       <div className="page-topbar">
-        <MobileMenuBtn />
-        <span style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--fg)" }}>
-          Panel Clínico
-        </span>
+        <SaasMenuBtn />
+        <span style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--fg)" }}>Panel Clínico</span>
         <div style={{ marginLeft: "auto" }}>
           <ThemeToggle />
         </div>
       </div>
 
-      {/* Scrollable content */}
       <div className="page-scroll">
-        {/* Header */}
         <div className="page-header">
-          <p className="page-section-label">Panel Clínico</p>
+          <p className="page-section-label">Panel Clínico · KOGNT Pro</p>
           <h1 className="page-title">Pacientes</h1>
         </div>
 
-        {/* KPI summary — only shown when there's data */}
         {patients.length > 0 && (
           <div
             style={{
@@ -137,9 +118,7 @@ export default function ClinicaView({
               { label: "Total", value: patients.length, color: "var(--accent)" },
             ].map((kpi) => (
               <div key={kpi.label} className="acid-panel" style={{ padding: "16px 20px" }}>
-                <p style={{ fontSize: "1.8rem", fontWeight: 800, color: kpi.color, letterSpacing: "-0.03em" }}>
-                  {kpi.value}
-                </p>
+                <p style={{ fontSize: "1.8rem", fontWeight: 800, color: kpi.color, letterSpacing: "-0.03em" }}>{kpi.value}</p>
                 <p style={{ fontSize: "0.72rem", color: "var(--fg-muted)", marginTop: 4, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>
                   {kpi.label}
                 </p>
@@ -148,12 +127,9 @@ export default function ClinicaView({
           </div>
         )}
 
-        {/* Patients table */}
         {patients.length === 0 ? (
           <div className="acid-panel" style={{ padding: 40, textAlign: "center" }}>
-            <p style={{ color: "var(--fg-muted)", fontSize: "0.9rem" }}>
-              No tienes pacientes registrados.
-            </p>
+            <p style={{ color: "var(--fg-muted)", fontSize: "0.9rem" }}>No tienes pacientes registrados.</p>
           </div>
         ) : (
           <div className="acid-panel" style={{ overflow: "hidden", marginBottom: 40 }}>
@@ -174,15 +150,7 @@ export default function ClinicaView({
                     <tr key={p.patientId}>
                       <td>
                         <span style={{ fontWeight: 600, color: "var(--fg)" }}>{p.fullName}</span>
-                        <span
-                          style={{
-                            display: "block",
-                            fontSize: "0.7rem",
-                            fontFamily: "monospace",
-                            color: "var(--fg-muted)",
-                            marginTop: 2,
-                          }}
-                        >
+                        <span style={{ display: "block", fontSize: "0.7rem", fontFamily: "monospace", color: "var(--fg-muted)", marginTop: 2 }}>
                           {p.patientId}
                         </span>
                       </td>
@@ -194,9 +162,7 @@ export default function ClinicaView({
                         <StatusBadge status={p.status} />
                       </td>
                       <td style={{ fontFamily: "monospace" }}>
-                        {p.nextAppointment ?? (
-                          <span style={{ color: "var(--fg-muted)" }}>—</span>
-                        )}
+                        {p.nextAppointment ?? <span style={{ color: "var(--fg-muted)" }}>—</span>}
                       </td>
                       <td>
                         <button className="action-btn">Ver</button>
@@ -209,20 +175,13 @@ export default function ClinicaView({
           </div>
         )}
 
-        {/* Agenda section */}
         <div>
           <p className="page-section-label" style={{ marginBottom: 8 }}>Agenda</p>
           <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--fg)", marginBottom: 20, letterSpacing: "-0.02em" }}>
             Semana actual
           </h2>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
-              gap: 10,
-            }}
-          >
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 10 }}>
             {DAYS_FULL.map((day, idx) => {
               const dayAppts = appointments.filter((a) => a.date === day);
               return (
@@ -232,34 +191,15 @@ export default function ClinicaView({
                   </div>
                   <div style={{ padding: 6 }}>
                     {dayAppts.length === 0 ? (
-                      <p style={{ color: "var(--fg-muted)", fontSize: "0.7rem", padding: "6px 4px", opacity: 0.5 }}>
-                        Libre
-                      </p>
+                      <p style={{ color: "var(--fg-muted)", fontSize: "0.7rem", padding: "6px 4px", opacity: 0.5 }}>Libre</p>
                     ) : (
                       dayAppts.map((appt) => (
-                        <div
-                          key={appt.appointmentId}
-                          className="schedule-appt"
-                          style={{
-                            borderLeft: `3px solid ${sessionColor(appt.sessionType)}`,
-                          }}
-                        >
-                          <p style={{ fontWeight: 600, fontSize: "0.78rem", color: "var(--fg)", lineHeight: 1.3 }}>
-                            {appt.patientName}
-                          </p>
+                        <div key={appt.appointmentId} className="schedule-appt" style={{ borderLeft: `3px solid ${sessionColor(appt.sessionType)}` }}>
+                          <p style={{ fontWeight: 600, fontSize: "0.78rem", color: "var(--fg)", lineHeight: 1.3 }}>{appt.patientName}</p>
                           <p style={{ fontSize: "0.68rem", fontFamily: "monospace", color: "var(--fg-muted)", marginTop: 2 }}>
                             {appt.startTime}–{appt.endTime}
                           </p>
-                          <p
-                            style={{
-                              fontSize: "0.6rem",
-                              textTransform: "uppercase",
-                              letterSpacing: "0.1em",
-                              color: sessionColor(appt.sessionType),
-                              marginTop: 3,
-                              fontWeight: 700,
-                            }}
-                          >
+                          <p style={{ fontSize: "0.6rem", textTransform: "uppercase", letterSpacing: "0.1em", color: sessionColor(appt.sessionType), marginTop: 3, fontWeight: 700 }}>
                             {appt.sessionType}
                           </p>
                         </div>
@@ -272,6 +212,6 @@ export default function ClinicaView({
           </div>
         </div>
       </div>
-    </AppShell>
+    </>
   );
 }

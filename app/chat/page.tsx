@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import ChatView from "./ChatView";
 import type { AppUser } from "../components/AppShell";
+import { normalizeRole } from "@/lib/portal";
 
 export default async function ChatPage() {
   const supabase = createClient();
@@ -19,10 +20,7 @@ export default async function ChatPage() {
   const appUser: AppUser = {
     name: (user.user_metadata?.full_name as string) || "",
     email: user.email || "",
-    role:
-      (user.user_metadata?.role as AppUser["role"]) === "clinico"
-        ? "clinico"
-        : "user",
+    role: normalizeRole(user.user_metadata?.role),
   };
 
   return <ChatView user={appUser} initialMessages={messages ?? []} />;

@@ -1,7 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
-import Nav from "@/app/components/Nav";
-import Footer from "@/app/components/Footer";
+import { PublicShell } from "@/app/components/PublicShell";
 
 export const metadata: Metadata = {
   title: "KOGNT — Legales",
@@ -9,11 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function LegalesLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-black flex flex-col">
-      <Nav />
-      <main className="flex-1">{children}</main>
-      <Footer />
-    </div>
-  );
+  return <PublicShell>{children}</PublicShell>;
 }

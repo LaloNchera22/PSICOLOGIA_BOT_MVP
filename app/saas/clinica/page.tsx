@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import ClinicaView from "./ClinicaView";
-import type { AppUser } from "../components/AppShell";
+import { normalizeRole } from "@/lib/portal";
 
 // Mock data — replace with real DB queries when schema includes patients
 const MOCK_PATIENTS = [
@@ -23,25 +23,11 @@ export default async function ClinicaPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  // Auth guard
   if (!user) redirect("/");
 
-  // Role guard — only clinico role can access this page
-  const role = (user.user_metadata?.role as string) || "user";
-  if (role !== "clinico") redirect("/chat");
+  // Only clinical professionals reach this surface.
+  const role = normalizeRole(user.user_metadata?.role);
+  if (role !== "clinico") redirect("/saas");
 
-  const appUser: AppUser = {
-    name: (user.user_metadata?.full_name as string) || "",
-    email: user.email || "",
-    role: "clinico",
-  };
-
-  return (
-    <ClinicaView
-      user={appUser}
-      patients={MOCK_PATIENTS}
-      appointments={MOCK_APPOINTMENTS}
-    />
-  );
+  return <ClinicaView patients={MOCK_PATIENTS} appointments={MOCK_APPOINTMENTS} />;
 }

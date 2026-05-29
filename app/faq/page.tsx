@@ -35,27 +35,27 @@ const faqs: FaqItem[] = [
   },
   {
     id: "f5",
-    question: "¿Qué es el Plan Clínico?",
+    question: "¿Qué es KOGNT Pro?",
     answer:
-      "Es nuestra suite para psicólogos independientes: gestión de pacientes, agenda integrada y acceso a métricas de sesión anonimizadas. Incluye panel de riskScore por paciente y herramientas de seguimiento.",
+      "Es nuestra suite para profesionales y empresas, en un portal independiente: gestión de pacientes y agenda para psicólogos, y un dashboard de bienestar agregado para empresas. Se accede de forma separada al portal de personas.",
   },
   {
     id: "f6",
-    question: "¿Cómo se usan mis datos corporativos?",
+    question: "¿Cómo se usan los datos corporativos?",
     answer:
-      "Todos los datos del dashboard B2B son 100% anónimos y agregados. Nunca se identifica a un empleado individual. El sistema usa diferencial de privacidad para garantizar anonimidad incluso en equipos pequeños.",
+      "Todos los datos del dashboard corporativo son 100% anónimos y agregados. Nunca se identifica a un empleado individual. El sistema usa privacidad diferencial para garantizar anonimidad incluso en equipos pequeños.",
   },
   {
     id: "f7",
     question: "¿Puedo exportar mi historial?",
     answer:
-      "Sí, desde Configuración → Suscripción → Plan Pro o superior. Exportamos en formato JSON cifrado con tu clave pública. El archivo solo puede descifrarlo tu dispositivo.",
+      "Sí, desde Ajustes → Suscripción → Plan Pro o superior. Exportamos en formato JSON cifrado con tu clave pública. El archivo solo puede descifrarlo tu dispositivo.",
   },
   {
     id: "f8",
     question: "¿KOGNT tiene API pública?",
     answer:
-      "Sí. Nuestro MaaS (Model as a Service) permite integrar el motor de triaje en tus propias aplicaciones. Contacta sales@kognt.io para acceso anticipado a la API beta.",
+      "Sí. Nuestro MaaS (Model as a Service) permite integrar el motor de triaje en tus propias aplicaciones, desde un portal de desarrolladores independiente. Escríbenos a sales@kognt.io para acceso anticipado.",
   },
 ];
 
@@ -67,61 +67,39 @@ export default function FaqPage() {
   }
 
   return (
-    <div className="bg-black min-h-screen px-6 py-12 text-white">
-      <div className="max-w-3xl mx-auto space-y-12">
+    <div className="public-content">
+      {/* Header */}
+      <div style={{ marginBottom: 40 }}>
+        <p className="accent-label" style={{ marginBottom: 14 }}>Ayuda</p>
+        <h1 style={{ fontSize: "2.6rem", fontWeight: 700, letterSpacing: "-0.03em", color: "var(--fg)", marginBottom: 10 }}>
+          Preguntas frecuentes
+        </h1>
+        <p style={{ color: "var(--fg-muted)", fontSize: "0.95rem" }}>
+          Todo lo que necesitas saber sobre KOGNT.
+        </p>
+      </div>
 
-        {/* ── Header ── */}
-        <div className="border-b border-white/10 pb-8">
-          <p className="text-xs uppercase tracking-widest font-semibold mb-3" style={{ color: "var(--accent)" }}>
-            Ayuda
-          </p>
-          <h1 className="text-5xl font-bold tracking-tight mb-2">PREGUNTAS FRECUENTES</h1>
-          <p className="text-white/40 text-sm">
-            Todo lo que necesitas saber sobre KOGNT.
-          </p>
-        </div>
+      {/* Accordion */}
+      <div>
+        {faqs.map((faq) => (
+          <div key={faq.id} className="faq-item">
+            <button className="faq-q" onClick={() => toggle(faq.id)} aria-expanded={openId === faq.id}>
+              <span>{faq.question}</span>
+              <span className="faq-toggle">{openId === faq.id ? "−" : "+"}</span>
+            </button>
+            {openId === faq.id && <p className="faq-a">{faq.answer}</p>}
+          </div>
+        ))}
+      </div>
 
-        {/* ── Accordion ── */}
-        <div>
-          {faqs.map((faq, idx) => (
-            <div
-              key={faq.id}
-              className={idx < faqs.length - 1 ? "border-b border-white/10" : ""}
-            >
-              <button
-                className="w-full flex items-center justify-between py-5 text-left gap-4 hover:text-white transition-colors"
-                style={{ color: openId === faq.id ? "white" : "rgba(255,255,255,0.7)" }}
-                onClick={() => toggle(faq.id)}
-              >
-                <span className="text-sm font-semibold uppercase tracking-wide">
-                  {faq.question}
-                </span>
-                <span
-                  className="text-xl font-light flex-shrink-0 leading-none"
-                  style={{ color: "var(--accent)" }}
-                >
-                  {openId === faq.id ? "−" : "+"}
-                </span>
-              </button>
-              {openId === faq.id && (
-                <p className="pb-6 text-sm text-white/50 leading-relaxed">
-                  {faq.answer}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* ── Footer note ── */}
-        <div className="border border-white/10 p-6">
-          <p className="text-xs uppercase tracking-widest text-white/40 mb-2">¿No encontraste tu respuesta?</p>
-          <p className="text-sm text-white/60">
-            Escríbenos a{" "}
-            <span style={{ color: "var(--accent)" }}>soporte@kognt.io</span>
-            {" "}— respondemos en menos de 24 horas.
-          </p>
-        </div>
-
+      {/* Footer note */}
+      <div className="acid-panel" style={{ padding: 24, marginTop: 36 }}>
+        <p style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.14em", color: "var(--fg-muted)", marginBottom: 8, fontWeight: 600 }}>
+          ¿No encontraste tu respuesta?
+        </p>
+        <p style={{ fontSize: "0.92rem", color: "var(--fg-2)" }}>
+          Escríbenos a <span style={{ color: "var(--accent)", fontWeight: 600 }}>soporte@kognt.io</span> — respondemos en menos de 24 horas.
+        </p>
       </div>
     </div>
   );

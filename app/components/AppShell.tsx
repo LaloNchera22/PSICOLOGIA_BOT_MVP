@@ -7,7 +7,9 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle, useTheme } from "./ThemeProvider";
 
-export type UserRole = "user" | "clinico";
+import type { Role } from "@/lib/portal";
+
+export type UserRole = Role;
 
 export interface AppUser {
   name: string;
@@ -30,12 +32,6 @@ interface AppShellProps {
 const ChatIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-  </svg>
-);
-
-const ClinicaIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
   </svg>
 );
 
@@ -70,16 +66,16 @@ const MenuIcon = () => (
   </svg>
 );
 
+// Consumer portal navigation only. The SaaS and MaaS portals have their
+// own shells — they are intentionally NOT reachable from here.
 const NAV_ITEMS: {
   href: string;
   label: string;
   icon: React.ReactNode;
-  roles: UserRole[];
 }[] = [
-  { href: "/chat", label: "Chat", icon: <ChatIcon />, roles: ["user", "clinico"] },
-  { href: "/clinica", label: "Clínica", icon: <ClinicaIcon />, roles: ["clinico"] },
-  { href: "/configuracion", label: "Ajustes", icon: <SettingsIcon />, roles: ["user", "clinico"] },
-  { href: "/faq", label: "FAQ", icon: <FaqIcon />, roles: ["user", "clinico"] },
+  { href: "/chat", label: "Chat", icon: <ChatIcon /> },
+  { href: "/configuracion", label: "Ajustes", icon: <SettingsIcon /> },
+  { href: "/faq", label: "FAQ", icon: <FaqIcon /> },
 ];
 
 export function AppShell({ user, children }: AppShellProps) {
@@ -88,11 +84,11 @@ export function AppShell({ user, children }: AppShellProps) {
   const { theme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(user.role));
+  const visibleItems = NAV_ITEMS;
   const firstName = (user.name || "").split(" ")[0] || "—";
   const rawInitials = (user.name || user.email || "??").replace(/\s+/g, "").slice(0, 2).toUpperCase();
   const logoSrc = theme === "dark" ? "/logo-white.png" : "/logo-dark.png";
-  const roleLabel = user.role === "clinico" ? "Clínico" : "Usuario";
+  const roleLabel = "Usuario";
 
   async function signOut() {
     const supabase = createClient();
