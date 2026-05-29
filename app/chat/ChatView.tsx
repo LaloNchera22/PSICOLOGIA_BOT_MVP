@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "../components/ThemeProvider";
-import { AppShell, MobileMenuBtn, type AppUser } from "../components/AppShell";
+import { AppShell, MenuBtn, type AppUser } from "../components/AppShell";
 import { detectLang, getT, type Lang } from "@/lib/i18n";
 
 type Message = {
@@ -107,7 +107,7 @@ export default function ChatView({
     <AppShell user={user}>
       {/* Chat header */}
       <header className="chat-header-new">
-        <MobileMenuBtn />
+        <MenuBtn />
 
         <div className="chat-header-center">
           <div className="chat-header-avatar">
@@ -126,7 +126,7 @@ export default function ChatView({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="chat-header-actions">
           <ThemeToggle />
         </div>
       </header>
