@@ -56,6 +56,7 @@ export default function LandingPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -95,6 +96,10 @@ export default function LandingPage() {
 
   async function handleGoogleAuth() {
     setError(null);
+    if (mode === "signup" && !acceptedTerms) {
+      setError(t.termsRequired);
+      return;
+    }
     setLoading(true);
     try {
       const supabase = createClient();
@@ -116,6 +121,10 @@ export default function LandingPage() {
     e.preventDefault();
     setError(null);
     setInfo(null);
+    if (mode === "signup" && !acceptedTerms) {
+      setError(t.termsRequired);
+      return;
+    }
     setLoading(true);
     try {
       const supabase = createClient();
@@ -348,6 +357,34 @@ export default function LandingPage() {
                 minLength={6}
               />
 
+              {mode === "signup" && (
+                <label
+                  className="flex items-start gap-2.5 text-xs leading-relaxed cursor-pointer pt-1"
+                  style={{ color: "var(--fg-muted)" }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-0.5 flex-shrink-0 accent-current cursor-pointer"
+                    style={{ accentColor: "var(--accent)" }}
+                  />
+                  <span>
+                    {t.termsAccept}
+                    <a
+                      href="/legales"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "var(--accent)" }}
+                      className="underline"
+                    >
+                      {t.termsLink}
+                    </a>
+                    {t.termsDisclaimer}
+                  </span>
+                </label>
+              )}
+
               {error && (
                 <p className="text-xs text-rose-500 text-center pt-1">{error}</p>
               )}
@@ -355,7 +392,11 @@ export default function LandingPage() {
                 <p className="text-xs text-center pt-1" style={{ color: "var(--accent)" }}>{info}</p>
               )}
 
-              <button type="submit" disabled={loading} className="primary-btn mt-3">
+              <button
+                type="submit"
+                disabled={loading || (mode === "signup" && !acceptedTerms)}
+                className="primary-btn mt-3"
+              >
                 {loading
                   ? "..."
                   : mode === "signup"

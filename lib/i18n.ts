@@ -30,6 +30,10 @@ export const translations: Record<Lang, {
   chatError: string;
   chatSignOut: string;
   sendLabel: string;
+  termsAccept: string;
+  termsLink: string;
+  termsDisclaimer: string;
+  termsRequired: string;
 }> = {
   en: {
     accentLabel: "your space",
@@ -65,6 +69,10 @@ export const translations: Record<Lang, {
     chatError: "sorry, I couldn't respond right now.",
     chatSignOut: "sign out",
     sendLabel: "Send",
+    termsAccept: "I accept the ",
+    termsLink: "terms & conditions",
+    termsDisclaimer: ". I understand this is emotional support and does not replace a mental health professional.",
+    termsRequired: "You must accept the terms to create your account.",
   },
   es: {
     accentLabel: "tu espacio",
@@ -100,6 +108,10 @@ export const translations: Record<Lang, {
     chatError: "lo siento, no pude responder ahora.",
     chatSignOut: "salir",
     sendLabel: "Enviar",
+    termsAccept: "Acepto los ",
+    termsLink: "términos y condiciones",
+    termsDisclaimer: ". Entiendo que esto es un acompañamiento emocional y no sustituye a un profesional de la salud mental.",
+    termsRequired: "Debes aceptar los términos para crear tu cuenta.",
   },
   pt: {
     accentLabel: "seu espaço",
@@ -135,6 +147,10 @@ export const translations: Record<Lang, {
     chatError: "desculpe, não consegui responder agora.",
     chatSignOut: "sair",
     sendLabel: "Enviar",
+    termsAccept: "Aceito os ",
+    termsLink: "termos e condições",
+    termsDisclaimer: ". Entendo que isto é um acompanhamento emocional e não substitui um profissional de saúde mental.",
+    termsRequired: "Você precisa aceitar os termos para criar sua conta.",
   },
   fr: {
     accentLabel: "votre espace",
@@ -170,6 +186,10 @@ export const translations: Record<Lang, {
     chatError: "désolé, je n'ai pas pu répondre maintenant.",
     chatSignOut: "déconnexion",
     sendLabel: "Envoyer",
+    termsAccept: "J'accepte les ",
+    termsLink: "conditions générales",
+    termsDisclaimer: ". Je comprends qu'il s'agit d'un soutien émotionnel et que cela ne remplace pas un professionnel de la santé mentale.",
+    termsRequired: "Vous devez accepter les conditions pour créer votre compte.",
   },
   de: {
     accentLabel: "dein Raum",
@@ -205,6 +225,10 @@ export const translations: Record<Lang, {
     chatError: "entschuldigung, ich konnte gerade nicht antworten.",
     chatSignOut: "abmelden",
     sendLabel: "Senden",
+    termsAccept: "Ich akzeptiere die ",
+    termsLink: "Allgemeinen Geschäftsbedingungen",
+    termsDisclaimer: ". Mir ist bewusst, dass dies eine emotionale Unterstützung ist und keinen Fachmann für psychische Gesundheit ersetzt.",
+    termsRequired: "Du musst die Bedingungen akzeptieren, um dein Konto zu erstellen.",
   },
   it: {
     accentLabel: "il tuo spazio",
@@ -240,6 +264,10 @@ export const translations: Record<Lang, {
     chatError: "scusa, non ho potuto rispondere adesso.",
     chatSignOut: "esci",
     sendLabel: "Invia",
+    termsAccept: "Accetto i ",
+    termsLink: "termini e condizioni",
+    termsDisclaimer: ". Capisco che si tratta di un supporto emotivo e non sostituisce un professionista della salute mentale.",
+    termsRequired: "Devi accettare i termini per creare il tuo account.",
   },
 };
 
