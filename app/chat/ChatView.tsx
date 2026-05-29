@@ -188,7 +188,9 @@ export default function ChatView({
         <div
           className="input-container"
           onMouseDown={(e) => {
-            if (e.target !== textareaRef.current) {
+            // Click-to-focus only when tapping the empty padding of the pill,
+            // never when interacting with the textarea or the send button.
+            if (e.target === e.currentTarget) {
               e.preventDefault();
               textareaRef.current?.focus();
             }
@@ -210,7 +212,6 @@ export default function ChatView({
                 send();
               }
             }}
-            disabled={sending}
           />
           <button
             className="send-btn"
