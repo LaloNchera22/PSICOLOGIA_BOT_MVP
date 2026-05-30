@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "../components/ThemeProvider";
 import { AppShell, ConfigMenu, HeaderLogo, type AppUser } from "../components/AppShell";
@@ -27,12 +28,28 @@ export default function ChatView({
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [plan, setPlan] = useState<"free" | "pro">("free");
+  const [remaining, setRemaining] = useState<number | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const pendingSent = useRef(false);
 
   useEffect(() => {
     setLang(detectLang());
+  }, []);
+
+  // Estado de plan / mensajes restantes al cargar.
+  useEffect(() => {
+    fetch("/api/usage")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d) return;
+        setPlan(d.plan === "pro" ? "pro" : "free");
+        setRemaining(d.remaining);
+        if (d.plan === "free" && d.remaining === 0) setLimitReached(true);
+      })
+      .catch(() => {});
   }, []);
 
   const t = getT(lang);
@@ -61,7 +78,7 @@ export default function ChatView({
   }
 
   async function sendText(text: string) {
-    if (!text.trim() || sending) return;
+    if (!text.trim() || sending || limitReached) return;
     setSending(true);
 
     const optimistic: Message = { id: `tmp-${Date.now()}`, role: "user", content: text };
@@ -73,8 +90,21 @@ export default function ChatView({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text }),
       });
+
+      // Límite de mensajes alcanzado (usuario free).
+      if (res.status === 402) {
+        setMessages((m) => m.filter((x) => x.id !== optimistic.id));
+        setRemaining(0);
+        setLimitReached(true);
+        return;
+      }
+
       if (!res.ok) throw new Error("network");
       const data = await res.json();
+      if (data.plan) setPlan(data.plan);
+      if (typeof data.remaining === "number" || data.remaining === null) {
+        setRemaining(data.remaining);
+      }
       setMessages((m) => [
         ...m.filter((x) => x.id !== optimistic.id),
         { id: data.userMessageId, role: "user", content: text },
@@ -185,6 +215,18 @@ export default function ChatView({
 
       {/* Input */}
       <div className="input-area">
+        {limitReached && (
+          <div className="limit-banner">
+            <div className="limit-banner-text">
+              Alcanzaste tus <strong>15 mensajes</strong> gratis de hoy. Se
+              reinician en 24 h, o pásate a <strong>Pro</strong> para chatear sin límite.
+            </div>
+            <Link href="/precios" className="limit-banner-btn">
+              Mejorar a Pro
+            </Link>
+          </div>
+        )}
+
         <div
           className="input-container"
           onMouseDown={(e) => {
@@ -200,7 +242,8 @@ export default function ChatView({
             ref={textareaRef}
             className="chat-input-field"
             rows={1}
-            placeholder={t.chatInputPlaceholder}
+            placeholder={limitReached ? "Límite alcanzado — vuelve en 24 h o mejora a Pro" : t.chatInputPlaceholder}
+            disabled={limitReached}
             value={input}
             onChange={(e) => {
               setInput(e.target.value);
@@ -216,7 +259,7 @@ export default function ChatView({
           <button
             className="send-btn"
             onClick={send}
-            disabled={sending || !input.trim()}
+            disabled={sending || !input.trim() || limitReached}
             aria-label={t.sendLabel}
           >
             <svg
@@ -229,7 +272,13 @@ export default function ChatView({
             </svg>
           </button>
         </div>
-        <p className="input-hint">Enter para enviar · Shift+Enter para nueva línea</p>
+        <p className="input-hint">
+          Enter para enviar · Shift+Enter para nueva línea
+          {plan === "free" && remaining !== null && !limitReached && (
+            <> · {remaining} de 15 mensajes restantes hoy</>
+          )}
+          {plan === "pro" && <> · Plan Pro · mensajes ilimitados</>}
+        </p>
       </div>
     </AppShell>
   );

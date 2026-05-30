@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@/lib/supabase/server";
+import { FREE_DAILY_LIMIT, FREE_WINDOW_MS, isProProfile } from "@/lib/plan";
 
 const SYSTEM_PROMPT = `Eres un asistente de acompañamiento emocional con enfoque psicológico.
 Tu rol es escuchar con empatía, validar emociones y ofrecer reflexiones suaves basadas en
@@ -28,6 +29,39 @@ export async function POST(req: Request) {
   const { message } = await req.json();
   if (!message || typeof message !== "string") {
     return NextResponse.json({ error: "invalid message" }, { status: 400 });
+  }
+
+  // --- Límite de mensajes según plan ---
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan, subscription_status")
+    .eq("id", user.id)
+    .single();
+
+  const isPro = isProProfile(profile);
+
+  if (!isPro) {
+    const since = new Date(Date.now() - FREE_WINDOW_MS).toISOString();
+    const { count } = await supabase
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("role", "user")
+      .gte("created_at", since);
+
+    const used = count ?? 0;
+    if (used >= FREE_DAILY_LIMIT) {
+      return NextResponse.json(
+        {
+          error: "limit_reached",
+          limitReached: true,
+          plan: "free",
+          limit: FREE_DAILY_LIMIT,
+          used,
+        },
+        { status: 402 }
+      );
+    }
   }
 
   const { data: history } = await supabase
@@ -75,9 +109,25 @@ export async function POST(req: Request) {
     .single();
   if (asstErr) return NextResponse.json({ error: asstErr.message }, { status: 500 });
 
+  // Mensajes restantes en la ventana de 24 h (para que la UI los muestre).
+  let remaining: number | null = null;
+  if (!isPro) {
+    const since = new Date(Date.now() - FREE_WINDOW_MS).toISOString();
+    const { count } = await supabase
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("role", "user")
+      .gte("created_at", since);
+    remaining = Math.max(0, FREE_DAILY_LIMIT - (count ?? 0));
+  }
+
   return NextResponse.json({
     reply,
     userMessageId: userInsert.id,
     assistantMessageId: asstInsert.id,
+    plan: isPro ? "pro" : "free",
+    remaining,
+    limit: isPro ? null : FREE_DAILY_LIMIT,
   });
 }
