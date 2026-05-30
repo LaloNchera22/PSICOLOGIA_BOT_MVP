@@ -10,6 +10,23 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
+-- 1.b Suscripciones (plan free / pro vía Stripe)
+-- Si la tabla profiles ya existía, estas columnas se agregan de forma segura.
+alter table public.profiles
+  add column if not exists plan text not null default 'free'
+    check (plan in ('free', 'pro'));
+alter table public.profiles
+  add column if not exists subscription_status text;          -- active | trialing | past_due | canceled | ...
+alter table public.profiles
+  add column if not exists stripe_customer_id text;
+alter table public.profiles
+  add column if not exists stripe_subscription_id text;
+alter table public.profiles
+  add column if not exists current_period_end timestamptz;
+
+create index if not exists profiles_stripe_customer_idx
+  on public.profiles (stripe_customer_id);
+
 -- 2. Tabla de mensajes de chat
 create table if not exists public.messages (
   id uuid primary key default gen_random_uuid(),

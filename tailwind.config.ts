@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
@@ -8,10 +9,15 @@ const config: Config = {
         cursive: ["var(--font-cursive)", "cursive"],
       },
       colors: {
-        ink: "#1a1a1a",
-        paper: "#fafaf7",
-        muted: "#8a8a85",
-        line: "#e8e6df",
+        ink: "#0a0a0a",
+        paper: "#ffffff",
+        muted: "#888888",
+        accent: {
+          DEFAULT: "#7C3AED",
+          hover: "#6D28D9",
+          light: "#A78BFA",
+        },
+        accent2: "#00DDB3",
       },
     },
   },
